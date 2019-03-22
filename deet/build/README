@@ -1,0 +1,7 @@
+The files in this directory help with building DEET.
+
+To build DEET it is necessary to have a running PostgreSQL instance, which
+will be used at compile time to type check SQL code. By doing this, the build
+will fail when schema changes are made without the corresponding source code
+changes. Since Nix builders run in a new network namespace, we can just start
+a PostgreSQL instance in the builder.

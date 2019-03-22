@@ -1,0 +1,2 @@
+In this directory you find the entry points for the application. These are
+directly requested by the client and delegate all work to methods in Deet\Main.

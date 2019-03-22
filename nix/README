@@ -1,0 +1,7 @@
+Pinning Nixpkgs works by simply fetchTarballing a version of Nixpkgs, and using
+that everywhere. The entry point is default.nix in the repository root. You can
+build things using nix-build -A, and it will automatically use the pinned
+Nixpkgs version. For example, to build DEET you would type the following
+command from the repository root:
+
+    nix-build -A deet

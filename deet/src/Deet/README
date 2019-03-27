@@ -1,0 +1,4 @@
+In this directory you find the source code of the application. You will find
+at least one source file and/or directory for every use case, named after the
+use case. In addition there is a directory called Support. It contains code
+that does not belong to a specific use case.

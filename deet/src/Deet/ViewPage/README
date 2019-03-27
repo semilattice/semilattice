@@ -1,0 +1,3 @@
+The view page use case defers most of its implementation to derived use cases.
+The only thing it really implements is the rendering of page metadata, and the
+routing of requests to titlespaces.

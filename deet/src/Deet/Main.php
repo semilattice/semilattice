@@ -2,14 +2,22 @@
 declare(strict_types = 1);
 namespace Deet;
 
+use Deet\Support\Template;
+
 final class Main
 {
-    private function __construct()
+    /** @var Template */
+    private $template;
+
+    public function __construct()
     {
+        $this->template = new Template\Original();
     }
 
-    public static function viewPage(string $title): void
+    public function viewPage(string $titlespace, string $title): void
     {
-        echo \htmlentities($title);
+        $templateTitle = "$titlespace: $title";
+        $templateBody = function(): void { echo 'Hello, world!'; };
+        $this->template->render($templateTitle, $templateBody);
     }
 }

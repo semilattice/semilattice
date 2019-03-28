@@ -10,6 +10,6 @@ final class WikiPage implements Page
 {
     public function body(): void
     {
-        echo 'wiki page lol';
+        echo '<p>wiki page lol</p>';
     }
 }

@@ -1,0 +1,2 @@
+In this directory you find static assets; after compilation they are served
+as-is to the client, with no server-side processing.

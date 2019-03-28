@@ -1,0 +1,94 @@
+/* TODO: Move this file to the src/Deet/Support/Template/Original directory. */
+
+/* TODO: Use a separate link tag for this. */
+@import url('https://fonts.googleapis.com/css?family=Merriweather:400,400i,700,700i|Roboto:700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext,vietnamese');
+
+/* TODO: Move this to a separate file. */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em,
+img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i,
+center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table,
+caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details,
+embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby,
+section, summary, time, mark, audio, video { margin: 0; padding: 0; border:
+0; font-size: 100%; font: inherit; vertical-align: baseline; } article,
+aside, details, figcaption, figure, footer, header, hgroup, menu, nav,
+section { display: block; } body { line-height: 1; } ol, ul { list-style:
+none; } blockquote, q { quotes: none; } blockquote:before, blockquote:after,
+q:before, q:after { content: ''; content: none; } table { border-collapse:
+collapse; border-spacing: 0; }
+
+/* TODO: Rewrite this using Sass. */
+*
+{
+    box-sizing: border-box;
+}
+
+body
+{
+    background-color: #322931;
+    color: #b9b5b8;
+    font-family: Merriweather, sans-serif;
+    font-size: 14px;
+    margin: 18px;
+}
+
+h1
+{
+    font-family: Roboto, serif;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 36px;
+}
+
+p
+{
+    line-height: 18px;
+}
+
+h1 + p, p + p
+{
+    margin-top: 18px;
+}
+
+.deet--container
+{
+    /*
+    background-image: linear-gradient(
+        transparent 0px,
+        transparent 17px,
+        silver 17px,
+        silver 18px
+    );
+    background-size: 1px 18px;
+    */
+    display: grid;
+    grid-template-columns: 200px 600px 200px;
+    margin: 0 auto;
+    width: 1000px;
+}
+
+.deet--header
+{
+    grid-area: 1 / 1 / 2 / 2;
+    padding: 18px;
+}
+
+.deet--navigation
+{
+    grid-area: 2 / 1 / 4 / 2;
+    padding: 18px;
+}
+
+.deet--content
+{
+    border: solid 1px #797379;
+    grid-area: 1 / 2 / 3 / 3;
+    padding: 17px;
+}
+
+.deet--footer
+{
+    grid-area: 3 / 2 / 4 / 3;
+    padding: 18px;
+}

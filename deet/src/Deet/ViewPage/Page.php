@@ -7,4 +7,7 @@ namespace Deet\ViewPage;
 interface Page
 {
     public function body(): void;
+
+    /** @return iterable<array{0:string,1:string}> */
+    public function parents(): iterable;
 }

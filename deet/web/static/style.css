@@ -51,6 +51,17 @@ h1 + p, p + p
     margin-top: 18px;
 }
 
+a
+{
+    color: #149b93;
+    text-decoration: none;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
+
 .deet--container
 {
     /*
@@ -91,4 +102,15 @@ h1 + p, p + p
 {
     grid-area: 3 / 2 / 4 / 3;
     padding: 18px;
+}
+
+.deet--page-parents
+{
+    line-height: 18px;
+    margin-top: 18px;
+}
+
+.deet--page-parents > a + a
+{
+    margin-left: 18px;
 }

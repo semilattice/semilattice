@@ -12,4 +12,10 @@ final class WikiPage implements Page
     {
         echo '<p>wiki page lol</p>';
     }
+
+    /** @return iterable<array{0:string,1:string}> */
+    public function parents(): iterable
+    {
+        return [['Wiki', 'Example 1'], ['Wiki', 'Example 2']];
+    }
 }

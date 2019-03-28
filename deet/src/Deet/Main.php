@@ -32,7 +32,20 @@ final class Main
         }
 
         $templateTitle = "$titlespace: $title";
-        $templateBody = function() use($page): void { $page->body(); };
+        $templateBody = function() use($page): void {
+            $page->body();
+            echo '<nav class="deet--page-parents">';
+            foreach ($page->parents() as list($parentTitlespace, $parentTitle))
+            {
+                echo '<a href="/viewPage.php';
+                echo '?titlespace=' . \urlencode($parentTitlespace);
+                echo '&amp;title=' . \urlencode($parentTitle);
+                echo '">';
+                echo \htmlentities("$parentTitlespace: $parentTitle");
+                echo '</a>';
+            }
+            echo '</nav>';
+        };
         $this->template->render($templateTitle, $templateBody);
     }
 }

@@ -62,6 +62,16 @@ a:hover
     text-decoration: underline;
 }
 
+em
+{
+    font-style: italic;
+}
+
+strong
+{
+    font-weight: bold;
+}
+
 .deet--container
 {
     /*
@@ -113,4 +123,10 @@ a:hover
 .deet--page-parents > a + a
 {
     margin-left: 18px;
+}
+
+.deet--wikitext-error
+{
+    background: #dd464c;
+    color: #000000;
 }

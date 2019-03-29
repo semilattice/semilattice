@@ -21,8 +21,8 @@ final class WikiTitlespace implements Titlespace
     public function retrievePage(string $title): ?Page
     {
         $row = $this->database->queryOne(/* sql */ '
-            SELECT wikitext
-            FROM wiki_pages
+            SELECT body
+            FROM deet.wiki_pages
             WHERE title = $1
         ', [$title]);
 

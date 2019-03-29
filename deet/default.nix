@@ -1,4 +1,4 @@
-{stdenv, phpPackages, postgresql_11}:
+{stdenv, phpPackages, postgresql_11, sqitchPg}:
 stdenv.mkDerivation {
     name = "deet";
     src = ./.;
@@ -6,6 +6,7 @@ stdenv.mkDerivation {
         phpPackages.composer
         phpPackages.psalm
         postgresql_11
+        sqitchPg
     ];
     phases = ["unpackPhase" "buildPhase" "installPhase"];
     buildPhase = ''

@@ -1,0 +1,5 @@
+%syntax-version=1.0.0
+%project=deet
+
+createSchema 1970-01-01T00:00:00Z dummy <dummy@dummy>
+createWikiPages [createSchema] 1970-01-01T00:00:00Z dummy <dummy@dummy>

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# TODO: Make this script idempotent so it can be run more than once.
+
+case $(whoami) in
+    postgres|nixbld)
+        ;;
+
+    *)
+        >&2 echo "$0 must run as 'postgres' or as 'nixbld', not as '$(whoami)'."
+        exit 1
+        ;;
+esac
+
+PGDATABASE=postgres psql <<'EOF'
+    CREATE ROLE deet_application LOGIN PASSWORD 'deet_application';
+    CREATE ROLE deet_migrations LOGIN PASSWORD 'deet_migrations';
+    CREATE DATABASE deet OWNER deet_migrations;
+EOF
+
+PGDATABASE=deet psql <<'EOF'
+    DROP SCHEMA public;
+EOF

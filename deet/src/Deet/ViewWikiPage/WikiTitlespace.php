@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Deet\ViewWikiPage;
 
+use Deet\Support\Database;
 use Deet\ViewPage\Page;
 use Deet\ViewPage\Titlespace;
 
@@ -9,8 +10,31 @@ use Deet\ViewPage\Titlespace;
 
 final class WikiTitlespace implements Titlespace
 {
+    /** @var Database */
+    private $database;
+
+    public function __construct(Database $database)
+    {
+        $this->database = $database;
+    }
+
     public function retrievePage(string $title): ?Page
     {
-        return new WikiPage();
+        $row = $this->database->queryOne(/* sql */ '
+            SELECT wikitext
+            FROM wiki_pages
+            WHERE title = $1
+        ', [$title]);
+
+        if ($row === NULL)
+        {
+            return NULL;
+        }
+        else
+        {
+            assert($row[0] !== NULL);
+        }
+
+        return new WikiPage($row[0]);
     }
 }

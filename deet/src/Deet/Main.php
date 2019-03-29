@@ -2,6 +2,7 @@
 declare(strict_types = 1);
 namespace Deet;
 
+use Deet\Support\Database;
 use Deet\Support\Template;
 
 final class Main
@@ -14,9 +15,10 @@ final class Main
 
     public function __construct()
     {
+        $database = new Database('');
         $this->template = new Template\Original();
         $this->viewPageTitlespaces = new ViewPage\Titlespaces([
-            'Wiki' => new ViewWikiPage\WikiTitlespace(),
+            'Wiki' => new ViewWikiPage\WikiTitlespace($database),
         ]);
     }
 

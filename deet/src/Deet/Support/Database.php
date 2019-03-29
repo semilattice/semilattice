@@ -29,6 +29,19 @@ final class Database
         }
     }
 
+    /**
+     * @param array<?string> $arguments
+     * @return ?array<?string>
+     */
+    public function queryOne(string $sql, array $arguments): ?array
+    {
+        foreach ($this->query($sql, $arguments) as $row)
+        {
+            return $row;
+        }
+        return NULL;
+    }
+
     /** @param array<?string> $arguments */
     public function execute(string $sql, array $arguments): void
     {

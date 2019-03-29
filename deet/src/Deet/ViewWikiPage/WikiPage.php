@@ -9,10 +9,17 @@ use Deet\Support\Wikitext;
 
 final class WikiPage implements Page
 {
+    /** @var string */
+    private $wikitext;
+
+    public function __construct(string $wikitext)
+    {
+        $this->wikitext = $wikitext;
+    }
+
     public function body(): void
     {
-        $wikitext = '<b><i>Lorem ipsum</em></b> <s>dolor</s> `sit amet.';
-        Wikitext::render($wikitext);
+        Wikitext::render($this->wikitext);
     }
 
     /** @return iterable<array{0:string,1:string}> */

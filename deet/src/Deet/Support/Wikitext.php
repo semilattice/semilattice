@@ -92,8 +92,7 @@ final class Wikitext
         $this->elementStack[] = $element;
 
         # Render the start tag.
-        # TODO: Map from Wikitext elements to HTML elements.
-        echo '<' . $element . '>';
+        $this->renderStartTag($element);
     }
 
     # This function is called by chunk when encountering an end tag.
@@ -117,20 +116,56 @@ final class Wikitext
             else
             {
                 $this->renderError("unclosed element: $elementStackTop");
-                # TODO: Map from Wikitext elements to HTML elements.
-                echo '</' . $elementStackTop . '>';
+                $this->renderEndTag($elementStackTop);
             }
         }
 
         # Render the end tag.
-        # TODO: Map from Wikitext elements to HTML elements.
-        echo '</' . $element . '>';
+        $this->renderEndTag($element);
     }
 
     # Backticks are prohibited.
     private function processBacktick(): void
     {
         $this->renderError("backtick");
+    }
+
+    private static function htmlElement(string $element): ?string
+    {
+        switch ($element)
+        {
+        case 'b': return 'strong';
+        case 'i': return 'em';
+        default: return NULL;
+        }
+    }
+
+    # Render an HTML start tag for a Wikitext element.
+    private function renderStartTag(string $element): void
+    {
+        $htmlElement = self::htmlElement($element);
+        if ($htmlElement === NULL)
+        {
+            $this->renderError("invalid element in start tag: $element");
+        }
+        else
+        {
+            echo "<$htmlElement>";
+        }
+    }
+
+    # Render an HTML end tag for a Wikitext element.
+    private function renderEndTag(string $element): void
+    {
+        $htmlElement = self::htmlElement($element);
+        if ($htmlElement === NULL)
+        {
+            $this->renderError("invalid element in end tag: $element");
+        }
+        else
+        {
+            echo "</$htmlElement>";
+        }
     }
 
     # This function renders a Wikitext syntax error.

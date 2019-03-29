@@ -68,6 +68,15 @@ final class Wikitext
             return TRUE;
         }
 
+        # Backtick.
+        $matches = $this->match('/\G`/');
+        if ($matches !== NULL)
+        {
+            $this->backtick();
+            $this->offset += 1;
+            return TRUE;
+        }
+
         # Plain text.
         echo \htmlentities(\substr($this->input, $this->offset, 1));
         $this->offset += 1;
@@ -114,6 +123,12 @@ final class Wikitext
         # Render the end tag.
         # TODO: Map from Wikitext elements to HTML elements.
         echo '</' . $element . '>';
+    }
+
+    # Backticks are prohibited.
+    private function backtick(): void
+    {
+        $this->error("backtick");
     }
 
     # This function renders a Wikitext syntax error.

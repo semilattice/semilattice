@@ -11,7 +11,7 @@ final class WikiPage implements Page
 {
     public function body(): void
     {
-        $wikitext = '<b><i>Lorem ipsum</em></b> dolor sit amet.';
+        $wikitext = '<b><i>Lorem ipsum</em></b> dolor `sit amet.';
         Wikitext::render($wikitext);
     }
 

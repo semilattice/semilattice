@@ -67,6 +67,11 @@ em
     font-style: italic;
 }
 
+s
+{
+    text-decoration: line-through;
+}
+
 strong
 {
     font-weight: bold;

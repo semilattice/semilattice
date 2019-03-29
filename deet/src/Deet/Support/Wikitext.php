@@ -136,6 +136,7 @@ final class Wikitext
         {
         case 'b': return 'strong';
         case 'i': return 'em';
+        case 's': return 's';
         default: return NULL;
         }
     }

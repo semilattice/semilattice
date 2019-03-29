@@ -2,7 +2,23 @@
 declare(strict_types = 1);
 namespace Deet\Support;
 
-# Conversion from Wikitext to HTML. Methods that deal with Wikitext have names
+# Conversion from Wikitext to HTML.
+#
+# Wikitext resembles HTML, but there are differences:
+#
+#  - The handling of whitespace is much more trivial in Wikitext than it is in
+#    HTML. For example, whitespace inside a tag is prohibited.
+#
+#  - There is a different set of elements. There are simple elements, which
+#    translate to HTML 1:1. For example, b becomes strong and does nothing more
+#    than that. And there are complex elements, which have more interesting
+#    behavior. For example, math renders LaTeX mathematics.
+#
+#  - A blank line introduces a new paragraph.
+#
+#  - Backticks are prohibited in normal text.
+#
+# Methods that deal with Wikitext have names
 # that begin with «process». Methods that deal with HTML have names that begin
 # with «render».
 
@@ -130,6 +146,7 @@ final class Wikitext
         $this->renderError("backtick");
     }
 
+    # For every simple Wikitext element, the corresponding HTML element.
     private static function htmlElement(string $element): ?string
     {
         switch ($element)

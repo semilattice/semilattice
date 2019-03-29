@@ -2,7 +2,9 @@
 declare(strict_types = 1);
 namespace Deet\Support;
 
-# Conversion from Wikitext to HTML.
+# Conversion from Wikitext to HTML. Methods that deal with Wikitext have names
+# that begin with «process». Methods that deal with HTML have names that begin
+# with «render».
 
 # TODO: Write a generative test that we always generate valid HTML, no matter
 # TODO: how horribly broken the Wikitext is.
@@ -12,7 +14,7 @@ final class Wikitext
     public static function render(string $input): void
     {
         $wikitext = new Wikitext($input);
-        while ($wikitext->chunk());
+        while ($wikitext->processChunk());
     }
 
     /** @var string */
@@ -31,9 +33,9 @@ final class Wikitext
         $this->elementStack = [];
     }
 
-    # Render one chunk of Wikitext and return whether it was the last one. Call
-    # this repeatedly to render all Wikitext.
-    public function chunk(): bool
+    # Process one chunk of Wikitext and return whether it was the last one.
+    # Call this repeatedly to render all Wikitext.
+    public function processChunk(): bool
     {
         if ($this->offset === 0)
         {
@@ -54,7 +56,7 @@ final class Wikitext
         $matches = $this->match('/\G<([a-z]+)>/');
         if ($matches !== NULL)
         {
-            $this->startTag($matches[1]);
+            $this->processStartTag($matches[1]);
             $this->offset += \strlen($matches[0]);
             return TRUE;
         }
@@ -63,7 +65,7 @@ final class Wikitext
         $matches = $this->match('/\G<\/([a-z]+)>/');
         if ($matches !== NULL)
         {
-            $this->endTag($matches[1]);
+            $this->processEndTag($matches[1]);
             $this->offset += \strlen($matches[0]);
             return TRUE;
         }
@@ -72,7 +74,7 @@ final class Wikitext
         $matches = $this->match('/\G`/');
         if ($matches !== NULL)
         {
-            $this->backtick();
+            $this->processBacktick();
             $this->offset += 1;
             return TRUE;
         }
@@ -84,7 +86,7 @@ final class Wikitext
     }
 
     # This function is called by chunk when encountering a start tag.
-    private function startTag(string $element): void
+    private function processStartTag(string $element): void
     {
         # Open the element.
         $this->elementStack[] = $element;
@@ -95,12 +97,12 @@ final class Wikitext
     }
 
     # This function is called by chunk when encountering an end tag.
-    private function endTag(string $element): void
+    private function processEndTag(string $element): void
     {
         # Check if element is open at all.
         if (!\in_array($element, $this->elementStack))
         {
-            $this->error("dangling end tag: $element");
+            $this->renderError("dangling end tag: $element");
             return;
         }
 
@@ -114,7 +116,7 @@ final class Wikitext
             }
             else
             {
-                $this->error("unclosed element: $elementStackTop");
+                $this->renderError("unclosed element: $elementStackTop");
                 # TODO: Map from Wikitext elements to HTML elements.
                 echo '</' . $elementStackTop . '>';
             }
@@ -126,13 +128,13 @@ final class Wikitext
     }
 
     # Backticks are prohibited.
-    private function backtick(): void
+    private function processBacktick(): void
     {
-        $this->error("backtick");
+        $this->renderError("backtick");
     }
 
     # This function renders a Wikitext syntax error.
-    private function error(string $message): void
+    private function renderError(string $message): void
     {
         echo '<span class="deet--wikitext-error">';
         echo "Invalid Wikitext at offset $this->offset: ";

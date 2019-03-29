@@ -28,14 +28,14 @@ body
 {
     background-color: #322931;
     color: #b9b5b8;
-    font-family: Merriweather, sans-serif;
+    font-family: Merriweather, serif;
     font-size: 14px;
     margin: 18px;
 }
 
 h1
 {
-    font-family: Roboto, serif;
+    font-family: Roboto, sans-serif;
     font-size: 28px;
     font-weight: bold;
     line-height: 36px;

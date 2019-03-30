@@ -18,6 +18,7 @@ final class Main
         $database = new Database('');
         $this->template = new Template\Original();
         $this->viewPageTitlespaces = new ViewPage\Titlespaces([
+            'Use Case' => new ViewUseCase\UseCaseTitlespace(),
             'Wiki' => new ViewWikiPage\WikiTitlespace($database),
         ]);
     }

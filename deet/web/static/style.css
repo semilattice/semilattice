@@ -31,6 +31,9 @@ body
     font-family: Merriweather, serif;
     font-size: 14px;
     margin: 18px;
+
+    background-color: #ffffff;
+    color: #000000;
 }
 
 h1
@@ -55,6 +58,8 @@ a
 {
     color: #149b93;
     text-decoration: none;
+
+    color: blue;
 }
 
 a:hover

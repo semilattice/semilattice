@@ -3,8 +3,8 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GADTSyntax #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Acetone.Anf
   ( -- * Programs
@@ -20,12 +20,17 @@ module Acetone.Anf
 
     -- * Constants
   , Constant (..)
+
+    -- * Free locals
+  , HasFree (..)
   ) where
 
 import Data.ByteString (ByteString)
-import Data.HashMap.Strict (HashMap)
-import Data.Hashable (Hashable)
+import Data.Map.Strict (Map)
+import Data.Set (Set, (\\))
 import Data.Word (Word64)
+
+import qualified Data.Map.Strict as M
 
 --------------------------------------------------------------------------------
 -- Programs
@@ -37,7 +42,7 @@ import Data.Word (Word64)
 -- of side effects. The bindings are unique: no two bindings bind the same
 -- variable, significantly simplifying transformation algorithms.
 data Let :: * -> * where
-  Let :: HashMap Local (Exp v) -> v -> Let v
+  Let :: Map Local (Exp v) -> v -> Let v
   deriving stock (Eq, Show)
   deriving stock (Foldable, Functor, Traversable)
 
@@ -56,7 +61,7 @@ data Exp :: * -> * where
 
   -- |
   -- Construct a record from fields and their values.
-  RecordExp :: HashMap Field v -> Exp v
+  RecordExp :: Map Field v -> Exp v
 
   -- |
   -- Project a record field by its name.
@@ -68,7 +73,7 @@ data Exp :: * -> * where
 
   -- |
   -- Analyze a variant by giving an expression for each possible discriminator.
-  CaseExp :: v -> HashMap Discriminator (Local, Let v) -> Exp v
+  CaseExp :: v -> Map Discriminator (Local, Let v) -> Exp v
 
   deriving stock (Eq, Show)
   deriving stock (Foldable, Functor, Traversable)
@@ -99,29 +104,25 @@ data Val :: * where
 -- lambda abstraction.
 newtype Local :: * where
   Local :: Word64 -> Local
-  deriving stock (Eq, Show)
-  deriving newtype (Hashable)
+  deriving stock (Eq, Ord, Show)
 
 -- |
 -- Name of a global variable; one that was defined at the top level.
 newtype Global :: * where
   Global :: Word64 -> Global
-  deriving stock (Eq, Show)
-  deriving newtype (Hashable)
+  deriving stock (Eq, Ord, Show)
 
 -- |
 -- Field of a record.
 newtype Field :: * where
   Field :: ByteString -> Field
-  deriving stock (Eq, Show)
-  deriving newtype (Hashable)
+  deriving stock (Eq, Ord, Show)
 
 -- |
 -- Discriminator of a variant.
 newtype Discriminator :: * where
   Discriminator :: ByteString -> Discriminator
-  deriving stock (Eq, Show)
-  deriving newtype (Hashable)
+  deriving stock (Eq, Ord, Show)
 
 --------------------------------------------------------------------------------
 -- Constants
@@ -130,4 +131,30 @@ newtype Discriminator :: * where
 -- Constant value; does not have free variables and can be quoted into the
 -- compiled program.
 data Constant :: * where
+  BoolConstant :: Bool -> Constant
   deriving stock (Eq, Show)
+
+--------------------------------------------------------------------------------
+-- Free locals
+
+-- |
+-- Find the locals that an expression expects to be in scope when being
+-- evaluated.
+class HasFree a where
+  free :: a -> Set Local
+
+instance HasFree v => HasFree (Let v) where
+  free (Let bs r) = (foldMap free bs <> free r) \\ M.keysSet bs
+
+instance HasFree v => HasFree (Exp v) where
+  free (LambdaExp x e)  = free e \\ [x]
+  free (ApplyExp e₁ e₂) = free e₁ <> free e₂
+  free (RecordExp fs)   = foldMap free fs
+  free (ProjectExp e _) = free e
+  free (InjectExp _ e)  = free e
+  free (CaseExp e₁ cs)  = free e₁ <> foldMap (\(x, e₂) -> free e₂ \\ [x]) cs
+
+instance HasFree Val where
+  free (LocalVal x)  = [x]
+  free GlobalVal{}   = []
+  free ConstantVal{} = []

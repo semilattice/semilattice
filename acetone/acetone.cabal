@@ -1,0 +1,22 @@
+cabal-version: >= 1.8
+build-type: Simple
+
+name: acetone
+version: 0.0.0
+
+library
+    build-depends:
+        base,
+        bytestring,
+        containers
+
+    exposed-modules:
+        Acetone.Anf
+
+    ghc-options:
+        -Wall
+        -Wincomplete-record-updates
+        -Wincomplete-uni-patterns
+
+    hs-source-dirs:
+        src

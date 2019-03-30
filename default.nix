@@ -9,6 +9,9 @@ let
         });
 in
     rec {
+        acetone = pkgs.callPackage ./acetone {};
+        acetoneGhcid = withGhcid acetone;
+
         deet = pkgs.callPackage ./deet {};
 
         rain = pkgs.callPackage ./rain {};

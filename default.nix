@@ -13,9 +13,4 @@ in
         acetoneGhcid = withGhcid acetone;
 
         deet = pkgs.callPackage ./deet {};
-
-        rain = pkgs.callPackage ./rain {};
-
-        salp = pkgs.callPackage ./salp {};
-        salpGhcid = withGhcid salp;
     }

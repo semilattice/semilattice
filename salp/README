@@ -1,3 +1,0 @@
-The Syntactic Alternative for PHP offers a subset of PHP features, concise
-syntax for Psalm-compatible type annotations, and convenient syntax for
-common patterns. In addition a library with useful utilities is included.

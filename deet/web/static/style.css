@@ -49,11 +49,6 @@ p
     line-height: 18px;
 }
 
-h1 + p, p + p
-{
-    margin-top: 18px;
-}
-
 a
 {
     color: #149b93;
@@ -80,6 +75,31 @@ s
 strong
 {
     font-weight: bold;
+}
+
+ol, ul
+{
+    padding-left: 18px;
+}
+
+ol
+{
+    list-style: decimal;
+}
+
+ul
+{
+    list-style: square;
+}
+
+li
+{
+    line-height: 18px;
+}
+
+* + h1, * + p, * + ol, * + ul, * + table
+{
+    margin-top: 18px;
 }
 
 .deet--container
@@ -142,4 +162,23 @@ strong
     font-style: normal;
     font-weight: normal;
     text-decoration: none;
+}
+
+.deet--properties-table
+{
+    width: 100%;
+}
+
+.deet--properties-table > tbody > tr > th
+{
+    background: #EEEEEE;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.deet--properties-table > tbody > tr > th,
+.deet--properties-table > tbody > tr > td
+{
+    border: solid 1px #797379;
+    line-height: 18px;
 }

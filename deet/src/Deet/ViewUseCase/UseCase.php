@@ -25,7 +25,7 @@ final class UseCase implements Page
 
     public function body(Titlespaces $titlespaces): void
     {
-        echo '<table>';
+        echo '<table class="deet--properties-table">';
         echo '<tbody>';
 
         echo '<tr>';

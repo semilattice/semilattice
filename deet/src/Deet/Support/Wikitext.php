@@ -2,6 +2,8 @@
 declare(strict_types = 1);
 namespace Deet\Support;
 
+use Deet\ViewPage\Titlespaces;
+
 # Conversion from Wikitext to HTML.
 #
 # Wikitext resembles HTML, but there are differences:
@@ -16,6 +18,9 @@ namespace Deet\Support;
 #
 #  - A blank line introduces a new paragraph.
 #
+#  - There is special syntax for special forms such as internal hyperlinks and
+#    inclusion of other pages.
+#
 #  - Backticks are prohibited in normal text.
 #
 # Methods that deal with Wikitext have names
@@ -27,11 +32,14 @@ namespace Deet\Support;
 
 final class Wikitext
 {
-    public static function render(string $input): void
+    public static function render(Titlespaces $titlespaces, string $input): void
     {
-        $wikitext = new Wikitext($input);
+        $wikitext = new Wikitext($titlespaces, $input);
         while ($wikitext->processChunk());
     }
+
+    /** @var Titlespaces */
+    private $titlespaces;
 
     /** @var string */
     private $input;
@@ -42,8 +50,9 @@ final class Wikitext
     /** @var string[] */
     private $elementStack;
 
-    public function __construct(string $input)
+    public function __construct(Titlespaces $titlespaces, string $input)
     {
+        $this->titlespaces = $titlespaces;
         $this->input = $input;
         $this->offset = 0;
         $this->elementStack = [];
@@ -82,6 +91,15 @@ final class Wikitext
         if ($matches !== NULL)
         {
             $this->processEndTag($matches[1]);
+            $this->offset += \strlen($matches[0]);
+            return TRUE;
+        }
+
+        # Inclusion.
+        $matches = $this->match('/\G{{([^:}|]+): ([^}|]+)}}/');
+        if ($matches !== NULL)
+        {
+            $this->processInclusion($matches[1], $matches[2]);
             $this->offset += \strlen($matches[0]);
             return TRUE;
         }
@@ -138,6 +156,26 @@ final class Wikitext
 
         # Render the end tag.
         $this->renderEndTag($element);
+    }
+
+    # Include another page into this page.
+    private function processInclusion(string $titlespace, string $title): void
+    {
+        $page = $this->titlespaces->retrievePage($titlespace, $title);
+        if ($page === NULL)
+        {
+            $this->renderError(
+                "inclusion of non-existent page: $titlespace: $title");
+        }
+        else
+        {
+            # TODO: How to deal with the outer paragraph of the included page?
+            # TODO: We do not want a paragraph there in some cases.
+
+            # BUG: Pages may include themselves resulting in an infinite loop.
+
+            $page->body($this->titlespaces);
+        }
     }
 
     # Backticks are prohibited.

@@ -2,24 +2,26 @@
 declare(strict_types = 1);
 namespace Deet\ViewWikiPage;
 
-use Deet\ViewPage\Page;
 use Deet\Support\Wikitext;
+use Deet\Support\WikitextFactory;
+use Deet\ViewPage\Page;
+use Deet\ViewPage\Titlespaces;
 
 # A wiki page renders wikitext.
 
 final class WikiPage implements Page
 {
     /** @var string */
-    private $wikitext;
+    private $body;
 
-    public function __construct(string $wikitext)
+    public function __construct(string $body)
     {
-        $this->wikitext = $wikitext;
+        $this->body = $body;
     }
 
-    public function body(): void
+    public function body(Titlespaces $titlespaces): void
     {
-        Wikitext::render($this->wikitext);
+        Wikitext::render($titlespaces, $this->body);
     }
 
     /** @return iterable<array{0:string,1:string}> */

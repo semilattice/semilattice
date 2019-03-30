@@ -35,7 +35,7 @@ final class Main
 
         $templateTitle = "$titlespace: $title";
         $templateBody = function() use($page): void {
-            $page->body();
+            $page->body($this->viewPageTitlespaces);
             echo '<nav class="deet--page-parents">';
             foreach ($page->parents() as list($parentTitlespace, $parentTitle))
             {

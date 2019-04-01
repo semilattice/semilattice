@@ -8,5 +8,8 @@ haskellPackages.mkDerivation {
         haskellPackages.base
         haskellPackages.bytestring
         haskellPackages.containers
+        haskellPackages.lens
+        haskellPackages.mtl
+        haskellPackages.transformers
     ];
 }

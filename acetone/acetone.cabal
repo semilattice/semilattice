@@ -8,7 +8,10 @@ library
     build-depends:
         base,
         bytestring,
-        containers
+        containers,
+        lens,
+        mtl,
+        transformers
 
     exposed-modules:
         Acetone.Ast,
@@ -16,7 +19,8 @@ library
         Acetone.Type,
         Acetone.Type.Check,
         Acetone.Type.Constraint,
-        Epoxy.Anf
+        Epoxy.Anf,
+        Main.Acetonec
 
     ghc-options:
         -Wall
@@ -25,3 +29,8 @@ library
 
     hs-source-dirs:
         src
+
+executable acetonec
+    build-depends: acetone, base
+    hs-source-dirs: main
+    main-is: acetonec.hs

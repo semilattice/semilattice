@@ -1,0 +1,10 @@
+Acetone is a programming language.
+
+The behavioral part of the language is similar to that of PureScript: lambda
+calculus with an expressive type system.
+
+The organizational part of the language is similar to that of C: there is one
+big namespace for all global definitions, compilation units may all be compiled
+in parallel, and interface files are written by hand (although no textual
+inclusion is used for sharing them; rather the compiler accepts multiple source
+files to form one compilation unit).

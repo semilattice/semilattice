@@ -6,7 +6,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE OverloadedLists #-}
 
-module Acetone.Anf
+module Epoxy.Anf
   ( -- * Programs
     Let (..)
   , Exp (..)

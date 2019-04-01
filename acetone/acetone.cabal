@@ -11,10 +11,12 @@ library
         containers
 
     exposed-modules:
-        Acetone.Anf,
         Acetone.Ast,
         Acetone.Interface,
-        Acetone.Type
+        Acetone.Type,
+        Acetone.Type.Check,
+        Acetone.Type.Constraint,
+        Epoxy.Anf
 
     ghc-options:
         -Wall

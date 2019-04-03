@@ -13,4 +13,6 @@ in
         acetoneGhcid = withGhcid acetone;
 
         deet = pkgs.callPackage ./deet {};
+
+        alkane = pkgs.callPackage ./alkane {};
     }

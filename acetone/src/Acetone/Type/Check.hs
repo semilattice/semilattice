@@ -79,7 +79,7 @@ import Acetone.Ast
 import Acetone.Interface (Interface (..))
 import Acetone.Type (Skolem (..), Type (..), Type', Unknown (..), hideUniverse, inUniverse)
 import Acetone.Type.Constraint (Constraint (..))
-import Control.Lens (Lens', (&), (?~), (^?), (%=), (?=), (<<+=), at, ix, lens, use)
+import Control.Lens (Lens', (&), (^.), (^?), (?~), (%=), (?=), (<<+=), _2, at, ix, lens, use)
 import Control.Monad ((>=>), foldM)
 import Control.Monad.Error.Class (MonadError)
 import Control.Monad.Reader.Class (MonadReader)
@@ -143,9 +143,9 @@ extractDef (TypeDef n ps κ τ) =
   pure $ Interface { interfaceTypes  = Map.singleton n (ps', κ', τ')
                    , interfaceValues = Map.empty }
 
-extractDef (SignatureDef n τ) =
+extractDef (SignatureDef n l τ) =
   pure $ Interface { interfaceTypes  = Map.empty
-                   , interfaceValues = Map.singleton n (translateTypeExp τ) }
+                   , interfaceValues = Map.singleton n (l, translateTypeExp τ) }
 
 extractDef ValueDef{} =
   pure Interface.empty
@@ -162,7 +162,7 @@ checkUnit i ds =
     TypeDef{}       -> pure ()
     SignatureDef{}  -> pure ()
     ValueDef x e    ->
-      case interfaceValues i ^? ix x of
+      case interfaceValues i ^? ix x . _2 of
         Nothing -> throwError $ UnknownValue x
         Just τ  -> checkTermExp i τ e
 
@@ -189,7 +189,7 @@ checkTermExp i τ e =
   runInfer $ do
 
     -- Check that term has expected type.
-    let γ = Γ { γValues = interfaceValues i }
+    let γ = Γ { γValues = fmap (^. _2) (interfaceValues i) }
     τ' <- skolemize τ
     τe <- inferTermExp γ e
     constrain $ τ' :~: τe

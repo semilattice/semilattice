@@ -6,6 +6,7 @@
 module Acetone.Ast
   ( -- * Names
     Name (..)
+  , Linkage (..)
 
     -- * Locations
   , Location (..)
@@ -26,6 +27,11 @@ import GHC.TypeLits (Nat)
 newtype Name :: * where
   Name :: ByteString -> Name
   deriving stock (Eq, Ord, Show)
+
+data Linkage :: * where
+  InternalLinkage :: Linkage
+  ExternalLinkage :: Linkage
+  deriving stock (Eq, Show)
 
 --------------------------------------------------------------------------------
 -- Locations
@@ -61,7 +67,7 @@ data Def :: * where
 
   -- |
   -- Declaration of a value.
-  SignatureDef :: Name -> TypeExp 0 -> Def
+  SignatureDef :: Name -> Linkage -> TypeExp 0 -> Def
 
   -- |
   -- Definition of a value.

@@ -13,11 +13,13 @@ main =
   let
     -- IDENTIFICATION DIVISION
     -- VALUE-ID mul
+    -- LINKAGE IS EXTERNAL
     -- SIGNATURE IS f32 -> f32 -> f32
     -- END-VALUE
     --
     -- IDENTIFICATION DIVISION
     -- VALUE-ID square
+    -- LINKAGE IS EXTERNAL
     -- SIGNATURE IS f32 -> f32
     --
     -- CALCULUS DIVISION
@@ -29,7 +31,7 @@ main =
     unit = [mulSig, squareSig, squareVal]
 
     mulSig =
-      SignatureDef (Name "mul")
+      SignatureDef (Name "mul") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
             FunctionTypeExp
@@ -41,7 +43,7 @@ main =
             (VariableTypeExp (Name "f32"))))
 
     squareSig =
-      SignatureDef (Name "square")
+      SignatureDef (Name "square") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
             FunctionTypeExp

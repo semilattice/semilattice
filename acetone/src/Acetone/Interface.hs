@@ -8,7 +8,7 @@ module Acetone.Interface
   , empty
   ) where
 
-import Acetone.Ast (Name)
+import Acetone.Ast (Linkage, Name)
 import Acetone.Type (Type)
 import Data.Map (Map)
 
@@ -20,7 +20,7 @@ import qualified Data.Map as Map
 data Interface :: * where
   Interface
     :: { interfaceTypes  :: Map Name ([(Name, Type 1)], Type 1, Type 0)
-       , interfaceValues :: Map Name (Type 0) }
+       , interfaceValues :: Map Name (Linkage, Type 0) }
     -> Interface
   deriving stock (Eq, Show)
 

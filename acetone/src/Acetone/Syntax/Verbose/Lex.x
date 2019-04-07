@@ -17,6 +17,7 @@ import Data.ByteString.Lazy (toStrict)
 tokens :-
 
   [\ \n]                  ;
+  "*>".*                  ;
 
   "abstract"              { \p _ -> (p, KeywordT "abstract") }
   "all"                   { \p _ -> (p, KeywordT "all") }

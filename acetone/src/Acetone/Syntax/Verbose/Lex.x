@@ -7,7 +7,8 @@
 module Acetone.Syntax.Verbose.Lex where
 
 import Data.ByteString (ByteString)
-import Data.ByteString.Lazy (toStrict)
+
+import qualified Data.ByteString.Lazy as BSL
 }
 
 -- TODO: Return Either instead of crashing.
@@ -42,10 +43,12 @@ tokens :-
   "record"                { \p _ -> (p, KeywordT "record") }
   "record-type"           { \p _ -> (p, KeywordT "record-type") }
   "remaining"             { \p _ -> (p, KeywordT "remaining") }
+  "since"                 { \p _ -> (p, KeywordT "since") }
   "signature"             { \p _ -> (p, KeywordT "signature") }
   "such"                  { \p _ -> (p, KeywordT "such") }
   "that"                  { \p _ -> (p, KeywordT "that") }
   "then"                  { \p _ -> (p, KeywordT "then") }
+  "usage"                 { \p _ -> (p, KeywordT "usage") }
   "value-id"              { \p _ -> (p, KeywordT "value-id") }
   "variant"               { \p _ -> (p, KeywordT "variant") }
   "variant-type"          { \p _ -> (p, KeywordT "variant-type") }
@@ -58,12 +61,15 @@ tokens :-
   "."                     { \p _ -> (p, PunctuationT ".") }
   "::"                    { \p _ -> (p, PunctuationT "::") }
 
-  [A-Za-z\-]+             { \p s -> (p, IdentifierT (toStrict s)) }
+  [A-Za-z\-]+             { \p s -> (p, IdentifierT (BSL.toStrict s)) }
+
+  \"([.\n]#[\"])*\"       { \p s -> (p, StringT (BSL.toStrict (BSL.tail (BSL.init s)))) }
 
 {
 data Token :: * where
   KeywordT :: ByteString -> Token
   PunctuationT :: ByteString -> Token
   IdentifierT :: ByteString -> Token
+  StringT :: ByteString -> Token
   deriving stock (Eq, Show)
 }

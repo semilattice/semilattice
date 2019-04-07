@@ -3,6 +3,15 @@
 
 identification division.
 value-id. unit.
+since. "v0".
+usage. "
+    The unit value is the element of the terminal object in Act.
+
+    Properties
+    ==========
+
+    * The unit value carries no information.
+".
 
 interface division.
 linkage is internal.

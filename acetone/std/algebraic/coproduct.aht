@@ -3,6 +3,10 @@
 
 identification division.
 value-id. make-left.
+since. "v0".
+usage. "
+    Construct a variant by injecting a value into the left element.
+".
 
 interface division.
 linkage is internal.
@@ -22,6 +26,10 @@ end-value.
 
 identification division.
 value-id. make-right.
+since. "v0".
+usage. "
+    Construct a variant by injecting a value into the right element.
+".
 
 interface division.
 linkage is internal.
@@ -41,6 +49,11 @@ end-value.
 
 identification division.
 value-id. coproduct.
+since. "v0".
+usage. "
+    Evaluate a coproduct by applying a function to the left or right element,
+    depending on which one was injected.
+".
 
 interface division.
 linkage is internal.

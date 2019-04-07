@@ -3,6 +3,10 @@
 
 identification division.
 value-id. S-combinator.
+since. "v0".
+usage. "
+    The S combinator from the SKI combinator calculus.
+".
 
 interface division.
 linkage is internal.
@@ -20,6 +24,10 @@ end-value.
 
 identification division.
 value-id. K-combinator.
+since. "v0".
+usage. "
+    The K combinator from the SKI combinator calculus.
+".
 
 interface division.
 linkage is internal.
@@ -35,6 +43,10 @@ end-value.
 
 identification division.
 value-id. I-combinator.
+since. "v0".
+usage. "
+    The I combinator from the SKI combinator calculus.
+".
 
 interface division.
 linkage is internal.

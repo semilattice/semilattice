@@ -3,6 +3,10 @@
 
 identification division.
 value-id. make-product.
+since. "v0".
+usage. "
+    Construct a pair from its two elements.
+".
 
 interface division.
 linkage is internal.
@@ -26,6 +30,15 @@ end-value.
 
 identification division.
 value-id. swap-product.
+since. "v0".
+usage. "
+    Swap the two elements of a pair.
+
+    Properties
+    ==========
+
+    * The swap function is involutory.
+".
 
 interface division.
 linkage is internal.

@@ -40,9 +40,11 @@ import Data.ByteString (ByteString)
   k_record_type           { ($$, KeywordT "record-type") }
   k_remaining             { ($$, KeywordT "remaining") }
   k_signature             { ($$, KeywordT "signature") }
+  k_since                 { ($$, KeywordT "since") }
   k_such                  { ($$, KeywordT "such") }
   k_that                  { ($$, KeywordT "that") }
   k_then                  { ($$, KeywordT "then") }
+  k_usage                 { ($$, KeywordT "usage") }
   k_value_id              { ($$, KeywordT "value-id") }
   k_variant_type          { ($$, KeywordT "variant-type") }
   k_when                  { ($$, KeywordT "when") }
@@ -56,6 +58,8 @@ import Data.ByteString (ByteString)
 
   identifier              { (unIdentifier -> Just $$) }
 
+  string                  { (unString -> Just $$) }
+
 %%
 
 Unit
@@ -67,6 +71,10 @@ Def
   : k_identification k_division p_period
     k_value_id p_period
       identifier p_period
+    k_since p_period
+      string p_period
+    k_usage p_period
+      string p_period
 
     k_interface k_division p_period
     k_linkage k_is Linkage p_period
@@ -77,8 +85,9 @@ Def
 
     k_end_value p_period
 
-    { [ withLocationDef $1 $ ValueSigDef (Name (snd $6)) $13 $17
-      , withLocationDef $1 $ ValueDef (Name (snd $6)) $22 ] }
+    { -- TODO: Preserve documentation information.
+      [ withLocationDef $1 $ ValueSigDef (Name (snd $6)) $21 $25
+      , withLocationDef $1 $ ValueDef (Name (snd $6)) $30 ] }
 
 TypeExp
   : TypeExp3 { $1 }
@@ -194,6 +203,10 @@ EvaluateExpBody
 unIdentifier :: (AlexPosn, Token) -> Maybe (AlexPosn, ByteString)
 unIdentifier (p, IdentifierT n) = Just (p, n)
 unIdentifier (_, _) = Nothing
+
+unString :: (AlexPosn, Token) -> Maybe (AlexPosn, ByteString)
+unString (p, StringT n) = Just (p, n)
+unString (_, _) = Nothing
 
 mkLocation :: AlexPosn -> Location
 mkLocation (AlexPn _ l c) = Location "<unknown>" l c

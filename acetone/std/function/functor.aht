@@ -3,6 +3,17 @@
 
 identification division.
 value-id. map-function.
+since. "v0".
+usage. "
+    Lift a function to work inside an environment. The environment is ignored
+    in the lifted function.
+
+    Properties
+    ==========
+
+    * Mapping the identity function is the identity operation.
+    * Mapping is a function composition homomorphism.
+".
 
 interface division.
 linkage is internal.
@@ -19,6 +30,11 @@ end-value.
 
 identification division.
 value-id. pure-function.
+since. "v0".
+usage. "
+    Lift a value to be inside an environment. The environment is ignored when
+    accessing the value, but must nonetheless be provided.
+".
 
 interface division.
 linkage is internal.
@@ -34,6 +50,10 @@ end-value.
 
 identification division.
 value-id. join-function.
+since. "v0".
+usage. "
+    Coalesce a value in two environments into a value in one environment.
+".
 
 interface division.
 linkage is internal.

@@ -1,0 +1,18 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. flip-function.
+
+interface division.
+linkage is external.
+signature is
+    for all a b c such that
+        (a -> b -> c) ->
+        (b -> a -> c).
+
+calculus division.
+    over f x y abstract
+        f y x.
+
+end-value.

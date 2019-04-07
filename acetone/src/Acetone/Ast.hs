@@ -90,6 +90,14 @@ data TypeExp :: Nat -> * where
   -- Universal quantification.
   ForAllTypeExp :: Name -> TypeExp 𝔲 -> TypeExp 𝔲
 
+  -- |
+  -- Row constructor.
+  RowConsTypeExp :: Name -> TypeExp 𝔲 -> TypeExp 𝔲 -> TypeExp 𝔲
+
+  -- |
+  -- Empty row.
+  RowNilTypeExp :: TypeExp 𝔲
+
   deriving stock (Eq, Show)
 
 -- |
@@ -112,5 +120,21 @@ data TermExp :: * where
   -- |
   -- Apply a function to an argument, returning its result.
   ApplyTermExp :: TermExp -> TermExp -> TermExp
+
+  -- |
+  -- Record constructor.
+  RecordTermExp :: [(Name, TermExp)] -> TermExp
+
+  -- |
+  -- Record projection.
+  RecordFieldTermExp :: TermExp -> Name -> TermExp
+
+  -- |
+  -- Variant injection.
+  VariantTermExp :: Name -> TermExp -> TermExp
+
+  -- |
+  -- Variant analysis.
+  EvaluateTermExp :: TermExp -> [(Name, Name, TermExp)] -> TermExp
 
   deriving stock (Eq, Show)

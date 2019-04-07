@@ -1,0 +1,64 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. make-left.
+
+interface division.
+linkage is internal.
+signature is
+    for all a r such that
+        a ->
+        variant-type
+            element left is a
+            remaining is r
+        end-variant-type.
+
+calculus division.
+    over a abstract
+        left#a.
+
+end-value.
+
+identification division.
+value-id. make-right.
+
+interface division.
+linkage is internal.
+signature is
+    for all b r such that
+        b ->
+        variant-type
+            element right is b
+            remaining is r
+        end-variant-type.
+
+calculus division.
+    over b abstract
+        right#b.
+
+end-value.
+
+identification division.
+value-id. coproduct.
+
+interface division.
+linkage is internal.
+signature is
+    for all a b r such that
+        (a -> r) ->
+        (b -> r) ->
+        variant-type
+            element left is a
+            element right is b
+        end-variant-type ->
+        r.
+
+calculus division.
+    over f g x abstract
+        evaluate x
+            when left#a then f a
+            when right#b then g b
+        end-evaluate.
+
+end-value.

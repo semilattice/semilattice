@@ -1,0 +1,20 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. absurd.
+
+interface division.
+linkage is internal.
+signature is
+    for all a such that
+        variant-type
+        end-variant-type ->
+        a.
+
+calculus division.
+    over x abstract
+        evaluate x
+        end-evaluate.
+
+end-value.

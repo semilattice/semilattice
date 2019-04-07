@@ -79,11 +79,15 @@ import Control.Monad.Error.Class (MonadError)
 import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import Control.Monad.Trans.State (StateT (..), evalStateT)
+import Data.Bifunctor (first, second)
 import Data.Foldable (for_, traverse_)
 import Data.Function (fix)
+import Data.List (sortBy)
 import Data.Map (Map)
 import Data.Maybe (fromMaybe)
+import Data.Ord (comparing)
 import Data.Set (Set)
+import Data.Traversable (for)
 import Data.Word (Word64)
 import GHC.TypeLits (KnownNat)
 
@@ -159,6 +163,13 @@ translateTypeExp γ (ApplyTypeExp τ₁ τ₂) =
 translateTypeExp γ (ForAllTypeExp x τ) =
   ForAllType x (translateTypeExp (Set.insert x γ) τ)
 
+translateTypeExp γ (RowConsTypeExp x τ₁ τ₂) =
+  RowConsType x (translateTypeExp γ τ₁)
+              (translateTypeExp γ τ₂)
+
+translateTypeExp _ RowNilTypeExp =
+  RowNilType
+
 --------------------------------------------------------------------------------
 -- Term expressions
 
@@ -209,6 +220,48 @@ inferTermExp γ (ApplyTermExp e₁ e₂) = do
 
   pure τr
 
+inferTermExp γ (RecordTermExp es) = do
+  -- TODO: Check for duplicate elements.
+  τes <- traverse (traverse (inferTermExp γ)) es
+  -- TODO: Replace (Name "record") type by intrinsic.
+  pure $ ApplyType (GlobalType (Name "record"))
+                   (foldr (uncurry RowConsType) RowNilType τes)
+
+inferTermExp γ (RecordFieldTermExp e x) = do
+  τe <- inferTermExp γ e
+
+  τx <- UnknownType <$> freshUnknown
+  τρ <- UnknownType <$> freshUnknown
+  -- TODO: Replace (Name "record") type by intrinsic.
+  constrain $ τe :~: ApplyType (GlobalType (Name "record"))
+                               (RowConsType x τx τρ)
+
+  pure τx
+
+inferTermExp γ (VariantTermExp x e) = do
+  τe <- inferTermExp γ e
+  τρ <- UnknownType <$> freshUnknown
+  -- TODO: Replace (Name "variant") type by intrinsic.
+  pure $ ApplyType (GlobalType (Name "variant"))
+                   (RowConsType x τe τρ)
+
+inferTermExp γ (EvaluateTermExp e₁ es) = do
+  τe₁ <- inferTermExp γ e₁
+
+  τr <- UnknownType <$> freshUnknown
+  τes <- for es $ \(x, x', e₂) -> do
+    τx' <- UnknownType <$> freshUnknown
+    let γe₂ = γ & _γValues . at x' ?~ τx'
+    τe₂ <- inferTermExp γe₂ e₂
+    constrain $ τe₂ :~: τr
+    pure (x, τx')
+
+  -- TODO: Replace (Name "variant") type by intrinsic.
+  constrain $ τe₁ :~: ApplyType (GlobalType (Name "variant"))
+                                (foldr (uncurry RowConsType) RowNilType τes)
+
+  pure τr
+
 --------------------------------------------------------------------------------
 -- Inference
 
@@ -255,11 +308,96 @@ unify' (ApplyType τ₁ τ₂) (ApplyType τ₃ τ₄) = do { unify τ₁ τ₃;
 unify' ForAllType{} _ = throwError HigherRankType
 unify' _ ForAllType{} = throwError HigherRankType
 
+unify' τ₁@RowConsType{} τ₂ = unifyRows τ₁ τ₂
+unify' τ₁ τ₂@RowConsType{} = unifyRows τ₁ τ₂
+
+unify' τ₁@RowNilType{} τ₂ = unifyRows τ₁ τ₂
+unify' τ₁ τ₂@RowNilType{} = unifyRows τ₁ τ₂
+
 cannotUnify :: KnownNat 𝔲 => Type 𝔲 -> Type 𝔲 -> Infer a
 cannotUnify τ₁ τ₂ = do
   τ₁' <- purge' τ₁
   τ₂' <- purge' τ₂
   throwError $ CannotUnify τ₁' τ₂'
+
+--------------------------------------------------------------------------------
+-- Row type unification
+
+-- DISCLAIMER: This code was copied from the PureScript compiler and adapted to
+-- DISCLAIMER: work with the Acetone AST and Type types. Credit goes to the
+-- DISCLAIMER: original authors. Naming and formatting are largely preserved
+-- DISCLAIMER: and hence inconsistent with the rest of this code base.
+
+data RowListItem 𝔲 = RowListItem
+  { rowListLabel :: Name
+  , _rowListType :: Type 𝔲 }
+
+unifyRows :: forall 𝔲. KnownNat 𝔲 => Type 𝔲 -> Type 𝔲 -> Infer ()
+unifyRows r1 r2 = sequence_ matches *> uncurry unifyTails rest where
+  (matches, rest) = alignRowsWith unify r1 r2
+
+  unifyTails :: ([RowListItem 𝔲], Type 𝔲) -> ([RowListItem 𝔲], Type 𝔲) -> Infer ()
+
+  unifyTails ([], UnknownType u) (sd, r) = resolve u (rowFromList (sd, r))
+  unifyTails (sd, r) ([], UnknownType u) = resolve u (rowFromList (sd, r))
+  unifyTails (sd1, UnknownType u1) (sd2, UnknownType u2) = do
+    -- TODO: Occurs check.
+    rest' <- UnknownType <$> freshUnknown
+    resolve u1 (rowFromList (sd2, rest'))
+    resolve u2 (rowFromList (sd1, rest'))
+
+  unifyTails ([], SkolemType s1) ([], SkolemType s2) | s1 == s2 = return ()
+  unifyTails (_, SkolemType{}) _ = cannotUnify r1 r2
+  unifyTails _ (_, SkolemType{}) = cannotUnify r1 r2
+
+  unifyTails ([], GlobalType v1) ([], GlobalType v2) | v1 == v2 = return ()
+  unifyTails (_, GlobalType{}) _ = cannotUnify r1 r2
+  unifyTails _ (_, GlobalType{}) = cannotUnify r1 r2
+
+  unifyTails ([], LocalType v1) ([], LocalType v2) | v1 == v2 = return ()
+  unifyTails (_, LocalType{}) _ = cannotUnify r1 r2
+  unifyTails _ (_, LocalType{}) = cannotUnify r1 r2
+
+  unifyTails (_, ApplyType{}) _ = cannotUnify r1 r2
+  unifyTails _ (_, ApplyType{}) = cannotUnify r1 r2
+
+  unifyTails (_, ForAllType{}) _ = throwError HigherRankType
+  unifyTails _ (_, ForAllType{}) = throwError HigherRankType
+
+  unifyTails (_, RowConsType{}) _ = cannotUnify r1 r2 -- Should never happen?
+  unifyTails _ (_, RowConsType{}) = cannotUnify r1 r2 -- Should never happen?
+
+  unifyTails ([], RowNilType) ([], RowNilType) = return ()
+  unifyTails (_, RowNilType) _ = return ()
+  unifyTails _ (_, RowNilType) = return ()
+
+alignRowsWith
+  :: (Type 𝔲 -> Type 𝔲 -> r)
+  -> Type 𝔲
+  -> Type 𝔲
+  -> ([r], (([RowListItem 𝔲], Type 𝔲), ([RowListItem 𝔲], Type 𝔲)))
+alignRowsWith f ty1 ty2 = go s1 s2 where
+  (s1, tail1) = rowToSortedList ty1
+  (s2, tail2) = rowToSortedList ty2
+
+  go [] r = ([], (([], tail1), (r, tail2)))
+  go r [] = ([], ((r, tail1), ([], tail2)))
+  go lhs@(RowListItem l1 t1 : r1) rhs@(RowListItem l2 t2 : r2)
+    | l1 < l2 = (second . first . first) (RowListItem l1 t1 :) (go r1 rhs)
+    | l2 < l1 = (second . second . first) (RowListItem l2 t2 :) (go lhs r2)
+    | otherwise = first (f t1 t2 :) (go r1 r2)
+
+rowToList :: Type 𝔲 -> ([RowListItem 𝔲], Type 𝔲)
+rowToList = go where
+  go (RowConsType name ty row) =
+    first (RowListItem name ty :) (rowToList row)
+  go r = ([], r)
+
+rowToSortedList :: Type 𝔲 -> ([RowListItem 𝔲], Type 𝔲)
+rowToSortedList = first (sortBy (comparing rowListLabel)) . rowToList
+
+rowFromList :: ([RowListItem 𝔲], Type 𝔲) -> Type 𝔲
+rowFromList (xs, r) = foldr (\(RowListItem name ty) -> RowConsType name ty) r xs
 
 --------------------------------------------------------------------------------
 -- Environment
@@ -299,12 +437,14 @@ instantemize φ = go0 Map.empty
   go0 γ (ForAllType x τ) = do { x' <- φ; go0 (Map.insert x x' γ) τ }
   go0 γ τ = go1 γ τ
 
-  go1 _ τ@UnknownType{}   = pure τ
-  go1 _ τ@SkolemType{}    = pure τ
-  go1 _ τ@GlobalType{}    = pure τ
-  go1 γ τ@(LocalType x)   = pure $ fromMaybe τ (γ ^? ix x)
-  go1 γ (ApplyType τ₁ τ₂) = ApplyType <$> go1 γ τ₁ <*> go1 γ τ₂
-  go1 _ ForAllType{}      = throwError HigherRankType
+  go1 _ τ@UnknownType{}       = pure τ
+  go1 _ τ@SkolemType{}        = pure τ
+  go1 _ τ@GlobalType{}        = pure τ
+  go1 γ τ@(LocalType x)       = pure $ fromMaybe τ (γ ^? ix x)
+  go1 γ (ApplyType τ₁ τ₂)     = ApplyType <$> go1 γ τ₁ <*> go1 γ τ₂
+  go1 _ ForAllType{}          = throwError HigherRankType
+  go1 γ (RowConsType x τ₁ τ₂) = RowConsType x <$> go1 γ τ₁ <*> go1 γ τ₂
+  go1 _ τ@RowNilType          = pure τ
 
 constrain :: Constraint -> Infer ()
 constrain = (_σConstraints %=) . (:)
@@ -331,12 +471,14 @@ purge τ = pure τ
 purge' :: KnownNat 𝔲 => Type 𝔲 -> Infer (Type 𝔲)
 purge' τ =
   purge τ >>= \case
-    τ'@UnknownType{}  -> pure τ'
-    τ'@SkolemType{}   -> pure τ'
-    τ'@GlobalType{}   -> pure τ'
-    τ'@LocalType{}    -> pure τ'
-    ApplyType τ'₁ τ'₂ -> ApplyType <$> purge' τ'₁ <*> purge' τ'₂
-    ForAllType{}      -> throwError HigherRankType
+    τ'@UnknownType{}      -> pure τ'
+    τ'@SkolemType{}       -> pure τ'
+    τ'@GlobalType{}       -> pure τ'
+    τ'@LocalType{}        -> pure τ'
+    ApplyType τ'₁ τ'₂     -> ApplyType <$> purge' τ'₁ <*> purge' τ'₂
+    ForAllType{}          -> throwError HigherRankType
+    RowConsType x τ'₁ τ'₂ -> RowConsType x <$> purge' τ'₁ <*> purge' τ'₂
+    τ'@RowNilType         -> pure τ'
 
 --------------------------------------------------------------------------------
 -- Errors

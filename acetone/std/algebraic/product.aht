@@ -1,0 +1,51 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. make-product.
+
+interface division.
+linkage is internal.
+signature is
+    for all a b such that
+        a ->
+        b ->
+        record-type
+            element first is a
+            element second is b
+        end-record-type.
+
+calculus division.
+    over a b abstract
+        record
+            element first is a
+            element second is b
+        end-record.
+
+end-value.
+
+identification division.
+value-id. swap-product.
+
+interface division.
+linkage is internal.
+signature is
+    for all a b r such that
+        record-type
+            element first is a
+            element second is b
+            remaining is r
+        end-record-type ->
+        record-type
+            element first is b
+            element second is a
+        end-record-type.
+
+calculus division.
+    over x abstract
+        record
+            element first is x::second
+            element second is x::first
+        end-record.
+
+end-value.

@@ -72,6 +72,14 @@ data Type :: Nat -> * where
   -- Universal quantification.
   ForAllType :: Name -> Type 𝔲 -> Type 𝔲
 
+  -- |
+  -- Row constructor.
+  RowConsType :: Name -> Type 𝔲 -> Type 𝔲 -> Type 𝔲
+
+  -- |
+  -- Empty row.
+  RowNilType :: Type 𝔲
+
   deriving stock (Eq, Show)
 
 --------------------------------------------------------------------------------

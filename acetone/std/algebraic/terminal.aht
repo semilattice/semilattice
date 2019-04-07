@@ -1,0 +1,17 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. unit.
+
+interface division.
+linkage is internal.
+signature is
+    record-type
+    end-record-type.
+
+calculus division.
+    record
+    end-record.
+
+end-value.

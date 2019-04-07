@@ -17,4 +17,4 @@ parse source =
   let (prologue', source') = BSL.splitAt (BSL.length prologue) source in
   if prologue /= prologue'
     then Left "invalid prologue"
-    else Verbose.parse source'
+    else Verbose.parse ("\n\n" <> source')

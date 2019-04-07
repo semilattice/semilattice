@@ -1,0 +1,37 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. identity-function.
+
+interface division.
+linkage is external.
+signature is
+    for all a such that
+        a -> a.
+
+calculus division.
+    I-combinator.
+
+end-value.
+
+identification division.
+value-id. compose-functions.
+
+interface division.
+linkage is external.
+signature is
+    for all a such that
+    for all b such that
+    for all c such that
+        (b -> c) ->
+        (a -> b) ->
+        (a -> c).
+
+calculus division.
+    over f abstract
+    over g abstract
+    over x abstract
+        f (g x).
+
+end-value.

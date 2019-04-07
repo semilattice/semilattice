@@ -68,6 +68,10 @@ data Type :: Nat -> * where
   -- Type application.
   ApplyType :: Type 𝔲 -> Type 𝔲 -> Type 𝔲
 
+  -- |
+  -- Universal quantification.
+  ForAllType :: Name -> Type 𝔲 -> Type 𝔲
+
   deriving stock (Eq, Show)
 
 --------------------------------------------------------------------------------

@@ -1,0 +1,55 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. S-combinator.
+
+interface division.
+linkage is external.
+signature is
+    for all r such that
+    for all a such that
+    for all b such that
+        (r -> a -> b) ->
+        (r -> a) ->
+        (r -> b).
+
+calculus division.
+    over f abstract
+    over g abstract
+    over r abstract
+        f r (g r).
+
+end-value.
+
+identification division.
+value-id. K-combinator.
+
+interface division.
+linkage is external.
+signature is
+    for all a such that
+    for all b such that
+        a -> b -> a.
+
+calculus division.
+    over x abstract
+    over y abstract
+        x.
+
+end-value.
+
+identification division.
+value-id. I-combinator.
+
+interface division.
+linkage is external.
+signature is
+    for all a such that
+        a -> a.
+
+calculus division.
+    over x abstract
+        x.
+
+end-value.

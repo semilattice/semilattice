@@ -86,6 +86,10 @@ data TypeExp :: Nat -> * where
   -- Type application.
   ApplyTypeExp :: TypeExp 𝔲 -> TypeExp 𝔲 -> TypeExp 𝔲
 
+  -- |
+  -- Universal quantification.
+  ForAllTypeExp :: Name -> TypeExp 𝔲 -> TypeExp 𝔲
+
   deriving stock (Eq, Show)
 
 -- |

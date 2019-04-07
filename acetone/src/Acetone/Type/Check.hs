@@ -82,12 +82,15 @@ import Control.Monad.Trans.State (StateT (..), evalStateT)
 import Data.Foldable (for_, traverse_)
 import Data.Function (fix)
 import Data.Map (Map)
+import Data.Maybe (fromMaybe)
+import Data.Set (Set)
 import Data.Word (Word64)
 import GHC.TypeLits (KnownNat)
 
 import qualified Control.Monad.Error.Class as Error
 import qualified Control.Monad.Reader.Class as Reader
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 
 --------------------------------------------------------------------------------
 -- High-level
@@ -117,7 +120,7 @@ extractValueSigs =
   -- TODO: Handle duplicate definitions.
   foldMap $ fix $ \f -> \case
     LocationDef _ d   -> (f d)
-    ValueSigDef n l τ -> Map.singleton n (l, translateTypeExp τ)
+    ValueSigDef n l τ -> Map.singleton n (l, translateTypeExp Set.empty τ)
     ValueDef{}        -> Map.empty
 
 --------------------------------------------------------------------------------
@@ -140,13 +143,21 @@ checkUnit xs ds =
 
 -- |
 -- Given a type expression, return the corresponding type.
-translateTypeExp :: TypeExp 𝔲 -> Type 𝔲
-translateTypeExp (LocationTypeExp _ τ) = translateTypeExp τ
-translateTypeExp (VariableTypeExp x) =
-  -- TODO: Look up in environment, make local if necessary.
-  GlobalType x
-translateTypeExp (ApplyTypeExp τ₁ τ₂) = ApplyType (translateTypeExp τ₁)
-                                                  (translateTypeExp τ₂)
+translateTypeExp :: Set Name -> TypeExp 𝔲 -> Type 𝔲
+
+translateTypeExp γ (LocationTypeExp _ τ) =
+  translateTypeExp γ τ
+
+translateTypeExp γ (VariableTypeExp x)
+  | x `Set.member` γ = LocalType x
+  | otherwise        = GlobalType x
+
+translateTypeExp γ (ApplyTypeExp τ₁ τ₂) =
+  ApplyType (translateTypeExp γ τ₁)
+            (translateTypeExp γ τ₂)
+
+translateTypeExp γ (ForAllTypeExp x τ) =
+  ForAllType x (translateTypeExp (Set.insert x γ) τ)
 
 --------------------------------------------------------------------------------
 -- Term expressions
@@ -241,6 +252,9 @@ unify' τ₂ τ₁@LocalType{} = cannotUnify τ₁ τ₂
 
 unify' (ApplyType τ₁ τ₂) (ApplyType τ₃ τ₄) = do { unify τ₁ τ₃; unify τ₂ τ₄ }
 
+unify' ForAllType{} _ = throwError HigherRankType
+unify' _ ForAllType{} = throwError HigherRankType
+
 cannotUnify :: KnownNat 𝔲 => Type 𝔲 -> Type 𝔲 -> Infer a
 cannotUnify τ₁ τ₂ = do
   τ₁' <- purge' τ₁
@@ -280,12 +294,17 @@ skolemize = instantemize (SkolemType <$> freshSkolem)
 -- |
 -- Shared implementation of 'instantiate' and 'skolemize'.
 instantemize :: Infer (Type 𝔲) -> Type 𝔲 -> Infer (Type 𝔲)
-instantemize _ τ@UnknownType{}   = pure τ
-instantemize _ τ@SkolemType{}    = pure τ
-instantemize _ τ@GlobalType{}    = pure τ
-instantemize _ τ@LocalType{}     = pure τ -- TODO: Substitute.
-instantemize φ (ApplyType τ₁ τ₂) = ApplyType <$> instantemize φ τ₁
-                                             <*> instantemize φ τ₂
+instantemize φ = go0 Map.empty
+  where
+  go0 γ (ForAllType x τ) = do { x' <- φ; go0 (Map.insert x x' γ) τ }
+  go0 γ τ = go1 γ τ
+
+  go1 _ τ@UnknownType{}   = pure τ
+  go1 _ τ@SkolemType{}    = pure τ
+  go1 _ τ@GlobalType{}    = pure τ
+  go1 γ τ@(LocalType x)   = pure $ fromMaybe τ (γ ^? ix x)
+  go1 γ (ApplyType τ₁ τ₂) = ApplyType <$> go1 γ τ₁ <*> go1 γ τ₂
+  go1 _ ForAllType{}      = throwError HigherRankType
 
 constrain :: Constraint -> Infer ()
 constrain = (_σConstraints %=) . (:)
@@ -317,6 +336,7 @@ purge' τ =
     τ'@GlobalType{}   -> pure τ'
     τ'@LocalType{}    -> pure τ'
     ApplyType τ'₁ τ'₂ -> ApplyType <$> purge' τ'₁ <*> purge' τ'₂
+    ForAllType{}      -> throwError HigherRankType
 
 --------------------------------------------------------------------------------
 -- Errors
@@ -327,6 +347,7 @@ data Ψ' :: * where
   UnknownValue :: Name -> Ψ'
   CannotUnify :: Type 𝔲 -> Type 𝔲 -> Ψ'
   PurgeInvalidUniverse :: Ψ'
+  HigherRankType :: Ψ'
 deriving stock instance Show Ψ'
 
 throwError :: (MonadReader Location f, MonadError Ψ f) => Ψ' -> f a

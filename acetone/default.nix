@@ -5,11 +5,16 @@ haskellPackages.mkDerivation {
     license = null;
     src = builtins.filterSource (p: t: p != toString ./dist) ./.;
     buildDepends = [
+        haskellPackages.array
         haskellPackages.base
         haskellPackages.bytestring
         haskellPackages.containers
         haskellPackages.lens
         haskellPackages.mtl
         haskellPackages.transformers
+    ];
+    buildTools = [
+        haskellPackages.alex
+        haskellPackages.happy
     ];
 }

@@ -4,60 +4,15 @@ module Main.Acetonec
   ( main
   ) where
 
-import Acetone.Ast
-
 import Acetone.Type.Check (checkAll)
+import Acetone.Syntax (parse)
+import Control.Monad ((<=<), join)
+import System.Environment (getArgs)
+
+import qualified Data.ByteString.Lazy as BSL
 
 main :: IO ()
-main =
-  let
-    -- IDENTIFICATION DIVISION
-    -- VALUE-ID mul
-    -- LINKAGE IS EXTERNAL
-    -- SIGNATURE IS f32 -> f32 -> f32
-    -- END-VALUE
-    --
-    -- IDENTIFICATION DIVISION
-    -- VALUE-ID square
-    -- LINKAGE IS EXTERNAL
-    -- SIGNATURE IS f32 -> f32
-    --
-    -- CALCULUS DIVISION
-    --   OVER x ABSTRACT
-    --     mul x x
-    --
-    -- END-VALUE
-
-    unit = [mulSig, squareSig, squareVal]
-
-    mulSig =
-      ValueSigDef (Name "mul") ExternalLinkage
-        (ApplyTypeExp
-          (ApplyTypeExp
-            (VariableTypeExp (Name "function"))
-            (VariableTypeExp (Name "f32")))
-          (ApplyTypeExp
-            (ApplyTypeExp
-              (VariableTypeExp (Name "function"))
-              (VariableTypeExp (Name "f32")))
-            (VariableTypeExp (Name "f32"))))
-
-    squareSig =
-      ValueSigDef (Name "square") ExternalLinkage
-        (ApplyTypeExp
-          (ApplyTypeExp
-            (VariableTypeExp (Name "function"))
-            (VariableTypeExp (Name "f32")))
-          (VariableTypeExp (Name "f32")))
-
-    squareVal =
-      ValueDef (Name "square")
-        (LambdaTermExp (Name "x")
-          (ApplyTermExp
-            (ApplyTermExp
-              (VariableTermExp (Name "mul"))
-              (VariableTermExp (Name "x")))
-            (VariableTermExp (Name "x"))))
-
-  in
-    print $ checkAll unit
+main = do
+  sources <- getArgs >>= traverse (either fail pure . parse <=< BSL.readFile)
+  let unit = join sources
+  print $ checkAll unit

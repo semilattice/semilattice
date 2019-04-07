@@ -7,17 +7,13 @@ value-id. S-combinator.
 interface division.
 linkage is external.
 signature is
-    for all r such that
-    for all a such that
-    for all b such that
+    for all r a b such that
         (r -> a -> b) ->
         (r -> a) ->
         (r -> b).
 
 calculus division.
-    over f abstract
-    over g abstract
-    over r abstract
+    over f g r abstract
         f r (g r).
 
 end-value.
@@ -28,13 +24,11 @@ value-id. K-combinator.
 interface division.
 linkage is external.
 signature is
-    for all a such that
-    for all b such that
+    for all a b such that
         a -> b -> a.
 
 calculus division.
-    over x abstract
-    over y abstract
+    over x y abstract
         x.
 
 end-value.

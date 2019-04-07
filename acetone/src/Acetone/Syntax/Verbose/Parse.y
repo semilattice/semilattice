@@ -89,9 +89,11 @@ TypeExp1
     { $2 }
   | identifier
     { withLocationTypeExp (fst $1) $ VariableTypeExp (Name (snd $1)) }
-  | k_for k_all identifier k_such k_that
+  | k_for k_all Identifiers1 k_such k_that
       TypeExp
-    { withLocationTypeExp $1 $ ForAllTypeExp (Name (snd $3)) $6 }
+    { withLocationTypeExp $1 $
+        let go (_, x) τ = ForAllTypeExp (Name x) τ in
+        foldr go $6 $3 }
 
 TermExp
   : TermExp2 { $1 }
@@ -108,13 +110,22 @@ TermExp1
     { $2 }
   | identifier
     { withLocationTermExp (fst $1) $ VariableTermExp (Name (snd $1)) }
-  | k_over identifier k_abstract
+  | k_over Identifiers1 k_abstract
       TermExp
-    { withLocationTermExp $1 $ LambdaTermExp (Name (snd $2)) $4 }
+    { withLocationTermExp $1 $
+        let go (_, x) e = LambdaTermExp (Name x) e in
+        foldr go $4 $2 }
 
 Linkage
   : k_external
     { ExternalLinkage }
+
+Identifiers0
+  : { [] }
+  | identifier Identifiers0 { $1 : $2 }
+
+Identifiers1
+  : identifier Identifiers0 { $1 : $2 }
 
 {
 unIdentifier :: (AlexPosn, Token) -> Maybe (AlexPosn, ByteString)

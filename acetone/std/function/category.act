@@ -21,17 +21,13 @@ value-id. compose-functions.
 interface division.
 linkage is external.
 signature is
-    for all a such that
-    for all b such that
-    for all c such that
+    for all a b c such that
         (b -> c) ->
         (a -> b) ->
         (a -> c).
 
 calculus division.
-    over f abstract
-    over g abstract
-    over x abstract
+    over f g x abstract
         f (g x).
 
 end-value.

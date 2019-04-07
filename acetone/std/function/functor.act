@@ -1,0 +1,49 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. map-function.
+
+interface division.
+linkage is internal.
+signature is
+    for all a b r such that
+        (a -> b) ->
+        (r -> a) ->
+        (r -> b).
+
+calculus division.
+    compose-functions.
+
+end-value.
+
+identification division.
+value-id. pure-function.
+
+interface division.
+linkage is internal.
+signature is
+    for all a r such that
+        a ->
+        (r -> a).
+
+calculus division.
+    K-combinator.
+
+end-value.
+
+identification division.
+value-id. join-function.
+
+interface division.
+linkage is internal.
+signature is
+    for all a r such that
+        (r -> (r -> a)) ->
+        (r -> a).
+
+calculus division.
+    over f r abstract
+        f r r.
+
+end-value.

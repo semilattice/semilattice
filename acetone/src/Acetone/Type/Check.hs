@@ -2,8 +2,9 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
@@ -141,10 +142,11 @@ checkUnit xs ds =
 -- Given a type expression, return the corresponding type.
 translateTypeExp :: TypeExp 𝔲 -> Type 𝔲
 translateTypeExp (LocationTypeExp _ τ) = translateTypeExp τ
-translateTypeExp (VariableTypeExp x) = VariableType x
+translateTypeExp (VariableTypeExp x) =
+  -- TODO: Look up in environment, make local if necessary.
+  GlobalType x
 translateTypeExp (ApplyTypeExp τ₁ τ₂) = ApplyType (translateTypeExp τ₁)
                                                   (translateTypeExp τ₂)
-translateTypeExp FunctionTypeExp = FunctionType
 
 --------------------------------------------------------------------------------
 -- Term expressions
@@ -181,7 +183,8 @@ inferTermExp γ (LambdaTermExp x e) = do
   let γe = γ & _γValues . at x ?~ τx
   τe <- inferTermExp γe e
 
-  let τλ = ApplyType (ApplyType FunctionType τx) τe
+  -- TODO: Replace (Name "function") type by intrinsic.
+  let τλ = ApplyType (ApplyType (GlobalType (Name "function")) τx) τe
 
   pure τλ
 
@@ -190,7 +193,8 @@ inferTermExp γ (ApplyTermExp e₁ e₂) = do
   τe₂ <- inferTermExp γ e₂
 
   τr <- UnknownType <$> freshUnknown
-  constrain $ τe₁ :~: ApplyType (ApplyType FunctionType τe₂) τr
+  -- TODO: Replace (Name "function") type by intrinsic.
+  constrain $ τe₁ :~: ApplyType (ApplyType (GlobalType (Name "function")) τe₂) τr
 
   pure τr
 
@@ -227,15 +231,15 @@ unify' (SkolemType s₁) (SkolemType s₂) | s₁ == s₂ = pure ()
 unify' τ₁@SkolemType{} τ₂ = cannotUnify τ₁ τ₂
 unify' τ₂ τ₁@SkolemType{} = cannotUnify τ₁ τ₂
 
-unify' (VariableType x₁) (VariableType x₂) | x₁ == x₂ = pure ()
-unify' τ₁@VariableType{} τ₂ = cannotUnify τ₁ τ₂
-unify' τ₂ τ₁@VariableType{} = cannotUnify τ₁ τ₂
+unify' (GlobalType x₁) (GlobalType x₂) | x₁ == x₂ = pure ()
+unify' τ₁@GlobalType{} τ₂ = cannotUnify τ₁ τ₂
+unify' τ₂ τ₁@GlobalType{} = cannotUnify τ₁ τ₂
+
+unify' (LocalType x₁) (LocalType x₂) | x₁ == x₂ = pure ()
+unify' τ₁@LocalType{} τ₂ = cannotUnify τ₁ τ₂
+unify' τ₂ τ₁@LocalType{} = cannotUnify τ₁ τ₂
 
 unify' (ApplyType τ₁ τ₂) (ApplyType τ₃ τ₄) = do { unify τ₁ τ₃; unify τ₂ τ₄ }
-unify' τ₁@ApplyType{} τ₂ = cannotUnify τ₁ τ₂
-unify' τ₁ τ₂@ApplyType{} = cannotUnify τ₁ τ₂
-
-unify' FunctionType FunctionType = pure ()
 
 cannotUnify :: KnownNat 𝔲 => Type 𝔲 -> Type 𝔲 -> Infer a
 cannotUnify τ₁ τ₂ = do
@@ -278,10 +282,10 @@ skolemize = instantemize (SkolemType <$> freshSkolem)
 instantemize :: Infer (Type 𝔲) -> Type 𝔲 -> Infer (Type 𝔲)
 instantemize _ τ@UnknownType{}   = pure τ
 instantemize _ τ@SkolemType{}    = pure τ
-instantemize _ τ@VariableType{}  = pure τ -- TODO: Substitute.
+instantemize _ τ@GlobalType{}    = pure τ
+instantemize _ τ@LocalType{}     = pure τ -- TODO: Substitute.
 instantemize φ (ApplyType τ₁ τ₂) = ApplyType <$> instantemize φ τ₁
                                              <*> instantemize φ τ₂
-instantemize _ τ@FunctionType    = pure τ
 
 constrain :: Constraint -> Infer ()
 constrain = (_σConstraints %=) . (:)
@@ -310,9 +314,9 @@ purge' τ =
   purge τ >>= \case
     τ'@UnknownType{}  -> pure τ'
     τ'@SkolemType{}   -> pure τ'
-    τ'@VariableType{} -> pure τ'
+    τ'@GlobalType{}   -> pure τ'
+    τ'@LocalType{}    -> pure τ'
     ApplyType τ'₁ τ'₂ -> ApplyType <$> purge' τ'₁ <*> purge' τ'₂
-    τ'@FunctionType   -> pure τ'
 
 --------------------------------------------------------------------------------
 -- Errors

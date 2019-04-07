@@ -57,17 +57,16 @@ data Type :: Nat -> * where
   SkolemType :: Skolem -> Type 𝔲
 
   -- |
-  -- Type variable.
-  VariableType :: Name -> Type 𝔲
+  -- Global type variable.
+  GlobalType :: Name -> Type 𝔲
+
+  -- |
+  -- Local type variable.
+  LocalType :: Name -> Type 𝔲
 
   -- |
   -- Type application.
   ApplyType :: Type 𝔲 -> Type 𝔲 -> Type 𝔲
-
-  -- |
-  -- The type constructor for function types.
-  FunctionType :: Type 𝔲
-  -- TODO: Replace FunctionType by IntrinsicType.
 
   deriving stock (Eq, Show)
 

@@ -34,11 +34,11 @@ main =
       ValueSigDef (Name "mul") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
-            FunctionTypeExp
+            (VariableTypeExp (Name "function"))
             (VariableTypeExp (Name "f32")))
           (ApplyTypeExp
             (ApplyTypeExp
-              FunctionTypeExp
+              (VariableTypeExp (Name "function"))
               (VariableTypeExp (Name "f32")))
             (VariableTypeExp (Name "f32"))))
 
@@ -46,7 +46,7 @@ main =
       ValueSigDef (Name "square") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
-            FunctionTypeExp
+            (VariableTypeExp (Name "function"))
             (VariableTypeExp (Name "f32")))
           (VariableTypeExp (Name "f32")))
 

@@ -86,10 +86,6 @@ data TypeExp :: Nat -> * where
   -- Type application.
   ApplyTypeExp :: TypeExp 𝔲 -> TypeExp 𝔲 -> TypeExp 𝔲
 
-  -- The type constructor for function types.
-  FunctionTypeExp :: TypeExp 𝔲
-  -- TODO: Replace FunctionTypeExp by IntrinsicTypeExp.
-
   deriving stock (Eq, Show)
 
 -- |

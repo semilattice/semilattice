@@ -15,7 +15,6 @@ library
 
     exposed-modules:
         Acetone.Ast,
-        Acetone.Interface,
         Acetone.Type,
         Acetone.Type.Check,
         Acetone.Type.Constraint,

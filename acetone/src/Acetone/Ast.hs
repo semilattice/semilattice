@@ -61,13 +61,8 @@ data Def :: * where
   LocationDef :: Location -> Def -> Def
 
   -- |
-  -- Definition of a new nominal type. It wraps an existing type, and possibly
-  -- has type parameters.
-  TypeDef :: Name -> [(Name, TypeExp 1)] -> TypeExp 1 -> TypeExp 0 -> Def
-
-  -- |
   -- Declaration of a value.
-  SignatureDef :: Name -> Linkage -> TypeExp 0 -> Def
+  ValueSigDef :: Name -> Linkage -> TypeExp 0 -> Def
 
   -- |
   -- Definition of a value.

@@ -11,11 +11,8 @@
 -- |
 -- Checking a compilation unit is a two-step process:
 --
---  1. Extract the interface from the compilation unit. This finds all global
---     definitions and collects information about them.
---
---  2. Type check all value definitions. This uses the interface that was
---     extracted previously.
+--  1. Extract the signatures.
+--  2. Type check all value definitions.
 module Acetone.Type.Check
   ( -- * High-level
     checkAll
@@ -26,9 +23,7 @@ module Acetone.Type.Check
   , withLocation
 
     -- ** Interfaces
-  , combineInterfaces
-  , extractUnit
-  , extractDef
+  , extractValueSigs
 
     -- ** Units
   , checkUnit
@@ -76,11 +71,9 @@ module Acetone.Type.Check
 
 import Acetone.Ast
 
-import Acetone.Interface (Interface (..))
 import Acetone.Type (Skolem (..), Type (..), Type', Unknown (..), hideUniverse, inUniverse)
 import Acetone.Type.Constraint (Constraint (..))
 import Control.Lens (Lens', (&), (^.), (^?), (?~), (%=), (?=), (<<+=), _2, at, ix, lens, use)
-import Control.Monad ((>=>), foldM)
 import Control.Monad.Error.Class (MonadError)
 import Control.Monad.Reader.Class (MonadReader)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT)
@@ -91,7 +84,6 @@ import Data.Map (Map)
 import Data.Word (Word64)
 import GHC.TypeLits (KnownNat)
 
-import qualified Acetone.Interface as Interface
 import qualified Control.Monad.Error.Class as Error
 import qualified Control.Monad.Reader.Class as Reader
 import qualified Data.Map as Map
@@ -100,9 +92,9 @@ import qualified Data.Map as Map
 -- High-level
 
 checkAll :: Unit -> Either Ψ ()
-checkAll ds = runCheck $ do
-  i <- extractUnit ds
-  checkUnit i ds
+checkAll ds = runCheck $
+  let xs = extractValueSigs ds in
+  checkUnit (fmap (^. _2) xs) ds
 
 --------------------------------------------------------------------------------
 -- Check
@@ -117,54 +109,30 @@ withLocation :: (MonadReader Location f) => Location -> f a -> f a
 withLocation = Reader.local . const
 
 --------------------------------------------------------------------------------
--- Interfaces
+-- Extract
 
-combineInterfaces :: Interface -> Interface -> Check Interface
-combineInterfaces (Interface a b) (Interface c d) =
-  -- TODO: Throw error when there are duplicate definitions.
-  pure $ Interface (a <> c) (b <> d)
-
--- |
--- Extract the interface from a unit.
-extractUnit :: Unit -> Check Interface
-extractUnit = traverse extractDef >=> foldM combineInterfaces Interface.empty
-
--- |
--- Extract the interface from a definition.
-extractDef :: Def -> Check Interface
-
-extractDef (LocationDef l d) =
-  withLocation l (extractDef d)
-
-extractDef (TypeDef n ps κ τ) =
-  let ps' = fmap (fmap translateTypeExp) ps in
-  let κ'  = translateTypeExp κ in
-  let τ'  = translateTypeExp τ in
-  pure $ Interface { interfaceTypes  = Map.singleton n (ps', κ', τ')
-                   , interfaceValues = Map.empty }
-
-extractDef (SignatureDef n l τ) =
-  pure $ Interface { interfaceTypes  = Map.empty
-                   , interfaceValues = Map.singleton n (l, translateTypeExp τ) }
-
-extractDef ValueDef{} =
-  pure Interface.empty
+extractValueSigs :: Unit -> Map Name (Linkage, Type 0)
+extractValueSigs =
+  -- TODO: Handle duplicate definitions.
+  foldMap $ fix $ \f -> \case
+    LocationDef _ d   -> (f d)
+    ValueSigDef n l τ -> Map.singleton n (l, translateTypeExp τ)
+    ValueDef{}        -> Map.empty
 
 --------------------------------------------------------------------------------
 -- Units
 
 -- |
 -- Given the interface, type check a unit.
-checkUnit :: Interface -> Unit -> Check ()
-checkUnit i ds =
+checkUnit :: Map Name (Type 0) -> Unit -> Check ()
+checkUnit xs ds =
   for_ ds $ fix $ \f -> \case
     LocationDef l d -> withLocation l (f d)
-    TypeDef{}       -> pure ()
-    SignatureDef{}  -> pure ()
+    ValueSigDef{}   -> pure ()
     ValueDef x e    ->
-      case interfaceValues i ^? ix x . _2 of
+      case xs ^? ix x of
         Nothing -> throwError $ UnknownValue x
-        Just τ  -> checkTermExp i τ e
+        Just τ  -> checkTermExp xs τ e
 
 --------------------------------------------------------------------------------
 -- Type expressions
@@ -184,12 +152,12 @@ translateTypeExp FunctionTypeExp = FunctionType
 -- |
 -- Check that a term has the given expected type. The given type will first be
 -- Skolemized.
-checkTermExp :: Interface -> Type 0 -> TermExp -> Check ()
-checkTermExp i τ e =
+checkTermExp :: Map Name (Type 0) -> Type 0 -> TermExp -> Check ()
+checkTermExp xs τ e =
   runInfer $ do
 
     -- Check that term has expected type.
-    let γ = Γ { γValues = fmap (^. _2) (interfaceValues i) }
+    let γ = Γ { γValues = xs }
     τ' <- skolemize τ
     τe <- inferTermExp γ e
     constrain $ τ' :~: τe

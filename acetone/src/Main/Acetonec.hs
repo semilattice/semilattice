@@ -31,7 +31,7 @@ main =
     unit = [mulSig, squareSig, squareVal]
 
     mulSig =
-      SignatureDef (Name "mul") ExternalLinkage
+      ValueSigDef (Name "mul") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
             FunctionTypeExp
@@ -43,7 +43,7 @@ main =
             (VariableTypeExp (Name "f32"))))
 
     squareSig =
-      SignatureDef (Name "square") ExternalLinkage
+      ValueSigDef (Name "square") ExternalLinkage
         (ApplyTypeExp
           (ApplyTypeExp
             FunctionTypeExp

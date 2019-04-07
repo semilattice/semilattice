@@ -26,6 +26,7 @@ import Data.ByteString (ByteString)
   k_for                   { ($$, KeywordT "for") }
   k_identification        { ($$, KeywordT "identification") }
   k_interface             { ($$, KeywordT "interface") }
+  k_internal              { ($$, KeywordT "internal") }
   k_is                    { ($$, KeywordT "is") }
   k_linkage               { ($$, KeywordT "linkage") }
   k_over                  { ($$, KeywordT "over") }
@@ -117,7 +118,9 @@ TermExp1
         foldr go $4 $2 }
 
 Linkage
-  : k_external
+  : k_internal
+    { InternalLinkage }
+  | k_external
     { ExternalLinkage }
 
 Identifiers0

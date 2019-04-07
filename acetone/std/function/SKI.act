@@ -5,7 +5,7 @@ identification division.
 value-id. S-combinator.
 
 interface division.
-linkage is external.
+linkage is internal.
 signature is
     for all r a b such that
         (r -> a -> b) ->
@@ -22,7 +22,7 @@ identification division.
 value-id. K-combinator.
 
 interface division.
-linkage is external.
+linkage is internal.
 signature is
     for all a b such that
         a -> b -> a.
@@ -37,7 +37,7 @@ identification division.
 value-id. I-combinator.
 
 interface division.
-linkage is external.
+linkage is internal.
 signature is
     for all a such that
         a -> a.

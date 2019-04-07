@@ -27,6 +27,7 @@ tokens :-
   "for"                   { \p _ -> (p, KeywordT "for") }
   "identification"        { \p _ -> (p, KeywordT "identification") }
   "interface"             { \p _ -> (p, KeywordT "interface") }
+  "internal"              { \p _ -> (p, KeywordT "internal") }
   "is"                    { \p _ -> (p, KeywordT "is") }
   "linkage"               { \p _ -> (p, KeywordT "linkage") }
   "over"                  { \p _ -> (p, KeywordT "over") }

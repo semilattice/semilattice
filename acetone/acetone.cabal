@@ -20,6 +20,7 @@ library
 
     exposed-modules:
         Acetone.Ast,
+        Acetone.Lower,
         Acetone.Syntax,
         Acetone.Syntax.Verbose,
         Acetone.Syntax.Verbose.Lex,
@@ -28,6 +29,7 @@ library
         Acetone.Type.Check,
         Acetone.Type.Constraint,
         Epoxy.Anf,
+        Epoxy.Build,
         Main.Acetonec
 
     ghc-options:

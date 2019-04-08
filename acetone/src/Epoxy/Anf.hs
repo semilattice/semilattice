@@ -7,8 +7,11 @@
 {-# LANGUAGE OverloadedLists #-}
 
 module Epoxy.Anf
-  ( -- * Programs
-    Let (..)
+  ( -- * Units
+    Unit
+
+    -- * Programs
+  , Let (..)
   , Exp (..)
   , Val (..)
 
@@ -31,6 +34,12 @@ import Data.Set (Set, (\\))
 import Data.Word (Word64)
 
 import qualified Data.Map.Strict as M
+
+--------------------------------------------------------------------------------
+-- Units
+
+type Unit v =
+  Map Global (Let v)
 
 --------------------------------------------------------------------------------
 -- Programs
@@ -109,7 +118,7 @@ newtype Local :: * where
 -- |
 -- Name of a global variable; one that was defined at the top level.
 newtype Global :: * where
-  Global :: Word64 -> Global
+  Global :: ByteString -> Global
   deriving stock (Eq, Ord, Show)
 
 -- |

@@ -25,7 +25,7 @@ import GHC.TypeLits (Nat)
 -- Names
 
 newtype Name :: * where
-  Name :: ByteString -> Name
+  Name :: { unName :: ByteString } -> Name
   deriving stock (Eq, Ord, Show)
 
 data Linkage :: * where

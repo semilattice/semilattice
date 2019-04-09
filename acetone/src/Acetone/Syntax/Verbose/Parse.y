@@ -150,7 +150,7 @@ TermExp3
 TermExp2
   : TermExp1
     { $1 }
-  | k_force TermExp2
+  | k_force TermExp1
     { withLocationTermExp $1 $
         ForceTermExp $2 }
 

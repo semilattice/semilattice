@@ -10,11 +10,8 @@ module Epoxy.Build
 
     -- * Expressions
   , lambda
-  , apply
-  , record
-  , project
-  , inject
   , case_
+  , reduction
 
     -- * Values
   , local
@@ -71,20 +68,11 @@ lift λ = B $ do
 lambda :: (Val -> B Val) -> B Val
 lambda λ = do { (x, e) <- lift λ; bind (LambdaExp x e) }
 
-apply :: Val -> Val -> B Val
-apply e₁ e₂ = bind (ApplyExp e₁ e₂)
-
-record :: Map Field Val -> B Val
-record es = bind (RecordExp es)
-
-project :: Val -> Field -> B Val
-project e x = bind (ProjectExp e x)
-
-inject :: Discriminator -> Val -> B Val
-inject x e = bind (InjectExp x e)
-
 case_ :: Val -> Map Discriminator (Val -> B Val) -> B Val
 case_ e λs = do { λs' <- traverse lift λs; bind (CaseExp e λs') }
+
+reduction :: Red Val -> B Val
+reduction r = bind (ReductionExp r)
 
 --------------------------------------------------------------------------------
 -- Values

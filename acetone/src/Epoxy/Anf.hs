@@ -13,6 +13,7 @@ module Epoxy.Anf
     -- * Programs
   , Let (..)
   , Exp (..)
+  , Red (..)
   , Val (..)
 
     -- * Names
@@ -65,24 +66,41 @@ data Exp :: * -> * where
   LambdaExp :: Local -> Let v -> Exp v
 
   -- |
+  -- Analyze a variant by giving an expression for each possible discriminator.
+  CaseExp :: v -> Map Discriminator (Local, Let v) -> Exp v
+
+  -- |
+  -- See 'Red'.
+  ReductionExp :: Red v -> Exp v
+
+  deriving stock (Eq, Show)
+  deriving stock (Foldable, Functor, Traversable)
+
+-- |
+-- Expression that does not bind variables; its evaluation is entirely
+-- bottom-up.
+data Red :: * -> * where
+
+  -- |
   -- Apply a function to an argument, returning its result.
-  ApplyExp :: v -> v -> Exp v
+  ApplyRed :: v -> v -> Red v
 
   -- |
   -- Construct a record from fields and their values.
-  RecordExp :: Map Field v -> Exp v
+  RecordRed :: Map Field v -> Red v
 
   -- |
   -- Project a record field by its name.
-  ProjectExp :: v -> Field -> Exp v
+  ProjectRed :: v -> Field -> Red v
 
   -- |
   -- Construct a variant from a discriminator and a value.
-  InjectExp :: Discriminator -> v -> Exp v
+  InjectRed :: Discriminator -> v -> Red v
 
   -- |
-  -- Analyze a variant by giving an expression for each possible discriminator.
-  CaseExp :: v -> Map Discriminator (Local, Let v) -> Exp v
+  -- Given a lambda that ignores its argument, memoize it. This can be used to
+  -- implement lazy evaluation.
+  LazyRed :: v -> Red v
 
   deriving stock (Eq, Show)
   deriving stock (Foldable, Functor, Traversable)
@@ -157,11 +175,11 @@ instance HasFree v => HasFree (Let v) where
 
 instance HasFree v => HasFree (Exp v) where
   free (LambdaExp x e)  = free e \\ [x]
-  free (ApplyExp e₁ e₂) = free e₁ <> free e₂
-  free (RecordExp fs)   = foldMap free fs
-  free (ProjectExp e _) = free e
-  free (InjectExp _ e)  = free e
   free (CaseExp e₁ cs)  = free e₁ <> foldMap (\(x, e₂) -> free e₂ \\ [x]) cs
+  free (ReductionExp r) = free r
+
+instance HasFree v => HasFree (Red v) where
+  free = foldMap free
 
 instance HasFree Val where
   free (LocalVal x)  = [x]

@@ -66,21 +66,21 @@ lowerTermExp γ (A.LambdaTermExp x e) =
 lowerTermExp γ (A.ApplyTermExp e₁ e₂) = do
   e₁' <- lowerTermExp γ e₁
   e₂' <- lowerTermExp γ e₂
-  B.apply e₁' e₂'
+  B.reduction $ E.ApplyRed e₁' e₂'
 
 lowerTermExp γ (A.RecordTermExp es) = do
   es' <- for es $ \(x, e) -> do
            e' <- lowerTermExp γ e
            pure (E.Field (A.unName x), e')
-  B.record (Map.fromList es')
+  B.reduction $ E.RecordRed (Map.fromList es')
 
 lowerTermExp γ (A.RecordFieldTermExp e x) = do
   e' <- lowerTermExp γ e
-  B.project e' (E.Field (A.unName x))
+  B.reduction $ E.ProjectRed e' (E.Field (A.unName x))
 
 lowerTermExp γ (A.VariantTermExp x e) = do
   e' <- lowerTermExp γ e
-  B.inject (E.Discriminator (A.unName x)) e'
+  B.reduction $ E.InjectRed (E.Discriminator (A.unName x)) e'
 
 lowerTermExp γ (A.EvaluateTermExp e₁ e₂s) = do
   e₁' <- lowerTermExp γ e₁

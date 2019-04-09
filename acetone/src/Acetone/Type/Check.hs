@@ -220,6 +220,19 @@ inferTermExp γ (ApplyTermExp e₁ e₂) = do
 
   pure τr
 
+inferTermExp γ (DeferTermExp e) = do
+  τe <- inferTermExp γ e
+  -- TODO: Replace (Name "lazy") type by intrinsic.
+  pure $ ApplyType (GlobalType (Name "lazy"))
+                  τe
+
+inferTermExp γ (ForceTermExp e) = do
+  τe <- inferTermExp γ e
+  τr <- UnknownType <$> freshUnknown
+  -- TODO: Replace (Name "lazy") type by intrinsic.
+  constrain $ τe :~: ApplyType (GlobalType (Name "lazy")) τr
+  pure τr
+
 inferTermExp γ (RecordTermExp es) = do
   -- TODO: Check for duplicate elements.
   τes <- traverse (traverse (inferTermExp γ)) es

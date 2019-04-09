@@ -1,0 +1,28 @@
+#acetone v0
+#syntax verbose
+
+identification division.
+value-id. map-lazy.
+since. "v0".
+usage. "
+    Lift a function to work on lazy values.
+
+    Properties
+    ==========
+
+    * Mapping the identity function is the identity operation.
+    * Mapping is a function composition homomorphism.
+".
+
+interface division.
+linkage is internal.
+signature is
+    for all a b such that
+        (     a ->      b) ->
+        (lazy a -> lazy b).
+
+calculus division.
+    over f x abstract
+        defer f (force x).
+
+end-value.

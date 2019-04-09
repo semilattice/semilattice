@@ -23,6 +23,7 @@ tokens :-
   "abstract"              { \p _ -> (p, KeywordT "abstract") }
   "all"                   { \p _ -> (p, KeywordT "all") }
   "calculus"              { \p _ -> (p, KeywordT "calculus") }
+  "defer"                 { \p _ -> (p, KeywordT "defer") }
   "division"              { \p _ -> (p, KeywordT "division") }
   "element"               { \p _ -> (p, KeywordT "element") }
   "end-evaluate"          { \p _ -> (p, KeywordT "end-evaluate") }
@@ -34,6 +35,7 @@ tokens :-
   "evaluate"              { \p _ -> (p, KeywordT "evaluate") }
   "external"              { \p _ -> (p, KeywordT "external") }
   "for"                   { \p _ -> (p, KeywordT "for") }
+  "force"                 { \p _ -> (p, KeywordT "force") }
   "identification"        { \p _ -> (p, KeywordT "identification") }
   "interface"             { \p _ -> (p, KeywordT "interface") }
   "internal"              { \p _ -> (p, KeywordT "internal") }

@@ -68,6 +68,15 @@ lowerTermExp γ (A.ApplyTermExp e₁ e₂) = do
   e₂' <- lowerTermExp γ e₂
   B.reduction $ E.ApplyRed e₁' e₂'
 
+lowerTermExp γ (A.DeferTermExp e) = do
+  e' <- B.lambda $ \_ -> lowerTermExp γ e
+  B.reduction $ E.LazyRed e'
+
+lowerTermExp γ (A.ForceTermExp e) = do
+  e' <- lowerTermExp γ e
+  u  <- B.reduction $ E.RecordRed Map.empty
+  B.reduction $ E.ApplyRed e' u
+
 lowerTermExp γ (A.RecordTermExp es) = do
   es' <- for es $ \(x, e) -> do
            e' <- lowerTermExp γ e

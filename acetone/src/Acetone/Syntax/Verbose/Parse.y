@@ -20,6 +20,7 @@ import Data.ByteString (ByteString)
   k_abstract              { ($$, KeywordT "abstract") }
   k_all                   { ($$, KeywordT "all") }
   k_calculus              { ($$, KeywordT "calculus") }
+  k_defer                 { ($$, KeywordT "defer") }
   k_division              { ($$, KeywordT "division") }
   k_element               { ($$, KeywordT "element") }
   k_end_evaluate          { ($$, KeywordT "end-evaluate") }
@@ -30,6 +31,7 @@ import Data.ByteString (ByteString)
   k_evaluate              { ($$, KeywordT "evaluate") }
   k_external              { ($$, KeywordT "external") }
   k_for                   { ($$, KeywordT "for") }
+  k_force                 { ($$, KeywordT "force") }
   k_identification        { ($$, KeywordT "identification") }
   k_interface             { ($$, KeywordT "interface") }
   k_internal              { ($$, KeywordT "internal") }
@@ -151,6 +153,9 @@ TermExp2
   | identifier p_hash TermExp2
     { withLocationTermExp (fst $1) $
         VariantTermExp (Name (snd $1)) $3 }
+  | k_force TermExp2
+    { withLocationTermExp $1 $
+        ForceTermExp $2 }
 
 TermExp1
   : p_left_parenthesis TermExp p_right_parenthesis
@@ -162,6 +167,9 @@ TermExp1
     { withLocationTermExp $1 $
         let go (_, x) e = LambdaTermExp (Name x) e in
         foldr go $4 $2 }
+  | k_defer TermExp
+    { withLocationTermExp $1 $
+        DeferTermExp $2 }
   | k_record RecordExpBody k_end_record
     { withLocationTermExp $1 $
         RecordTermExp $2 }

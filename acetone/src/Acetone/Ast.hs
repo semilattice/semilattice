@@ -122,6 +122,14 @@ data TermExp :: * where
   ApplyTermExp :: TermExp -> TermExp -> TermExp
 
   -- |
+  -- Wrap a value in a lazy thunk.
+  DeferTermExp :: TermExp -> TermExp
+
+  -- |
+  -- Compute a lazy thunk and return its value.
+  ForceTermExp :: TermExp -> TermExp
+
+  -- |
   -- Record constructor.
   RecordTermExp :: [(Name, TermExp)] -> TermExp
 

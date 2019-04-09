@@ -56,12 +56,12 @@ tokens :-
   "variant-type"          { \p _ -> (p, KeywordT "variant-type") }
   "when"                  { \p _ -> (p, KeywordT "when") }
 
-  "#"                     { \p _ -> (p, PunctuationT "#") }
   "("                     { \p _ -> (p, PunctuationT "(") }
   ")"                     { \p _ -> (p, PunctuationT ")") }
   "->"                    { \p _ -> (p, PunctuationT "->") }
   "."                     { \p _ -> (p, PunctuationT ".") }
   "::"                    { \p _ -> (p, PunctuationT "::") }
+  "??"                    { \p _ -> (p, PunctuationT "??") }
 
   [A-Za-z\-]+             { \p s -> (p, IdentifierT (BSL.toStrict s)) }
 

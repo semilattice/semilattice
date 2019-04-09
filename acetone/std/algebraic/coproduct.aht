@@ -19,8 +19,7 @@ signature is
         end-variant-type.
 
 calculus division.
-    over a abstract
-        left#a.
+    left??.
 
 end-value.
 
@@ -42,8 +41,7 @@ signature is
         end-variant-type.
 
 calculus division.
-    over b abstract
-        right#b.
+    right??.
 
 end-value.
 
@@ -70,8 +68,8 @@ signature is
 calculus division.
     over f g x abstract
         evaluate x
-            when left#a then f a
-            when right#b then g b
+            when left??a then f a
+            when right??b then g b
         end-evaluate.
 
 end-value.

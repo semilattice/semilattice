@@ -52,10 +52,10 @@ import Data.ByteString (ByteString)
   k_when                  { ($$, KeywordT "when") }
 
   p_colon_colon           { ($$, PunctuationT "::") }
-  p_hash                  { ($$, PunctuationT "#") }
   p_hyphen_greater        { ($$, PunctuationT "->") }
   p_left_parenthesis      { ($$, PunctuationT "(") }
   p_period                { ($$, PunctuationT ".") }
+  p_question_question     { ($$, PunctuationT "??") }
   p_right_parenthesis     { ($$, PunctuationT ")") }
 
   identifier              { (unIdentifier -> Just $$) }
@@ -150,9 +150,6 @@ TermExp3
 TermExp2
   : TermExp1
     { $1 }
-  | identifier p_hash TermExp2
-    { withLocationTermExp (fst $1) $
-        VariantTermExp (Name (snd $1)) $3 }
   | k_force TermExp2
     { withLocationTermExp $1 $
         ForceTermExp $2 }
@@ -173,6 +170,11 @@ TermExp1
   | k_record RecordExpBody k_end_record
     { withLocationTermExp $1 $
         RecordTermExp $2 }
+  | identifier p_question_question
+    { withLocationTermExp (fst $1) $
+        LambdaTermExp (Name "?") $
+          VariantTermExp (Name (snd $1))
+                         (VariableTermExp (Name "?")) }
   | k_evaluate TermExp EvaluateExpBody k_end_evaluate
     { withLocationTermExp $1 $
         EvaluateTermExp $2 $3 }
@@ -203,7 +205,7 @@ RecordExpBody
   | { [] }
 
 EvaluateExpBody
-  : k_when identifier p_hash identifier k_then TermExp EvaluateExpBody
+  : k_when identifier p_question_question identifier k_then TermExp EvaluateExpBody
     { (Name (snd $2), Name (snd $4), $6) : $7 }
   | { [] }
 

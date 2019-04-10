@@ -44,7 +44,7 @@ runB :: B Val -> Let Val
 runB (B b) =
   let σ = Σ 0 Map.empty in
   let (r, σ') = runState b σ in
-  Let (σBindings σ') r
+  LetRec (σBindings σ') (Return r)
 
 bind :: Exp Val -> B Val
 bind e = B $ do
@@ -60,7 +60,7 @@ lift λ = B $ do
   r <- unB (λ (LocalVal x))
   bs <- _σBindings <<.= oldBindings
 
-  pure (x, Let bs r)
+  pure (x, LetRec bs (Return r))
 
 --------------------------------------------------------------------------------
 -- Expressions

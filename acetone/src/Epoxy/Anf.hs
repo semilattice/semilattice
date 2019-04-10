@@ -46,13 +46,25 @@ type Unit v =
 -- Programs
 
 -- |
--- Set of recursive bindings together with a result. Each binding is in scope
--- of the result and in all the other bindings. The bindings are unordered: the
--- order in which they are evaluated is not important, because they are devoid
--- of side effects. The bindings are unique: no two bindings bind the same
--- variable, significantly simplifying transformation algorithms.
+-- Let bindings.
 data Let :: * -> * where
-  Let :: Map Local (Exp v) -> v -> Let v
+
+  -- |
+  -- A strict let binding and a continuation.
+  Let :: Local -> Exp v -> Let v -> Let v
+
+  -- |
+  -- A collection of mutually-recursive lazy let bindings and a continuation.
+  -- The bindings are unordered: the order in which they are evaluated is not
+  -- important, because they are lazy. The bindings are unique: no two bindings
+  -- bind the same variable, significantly simplifying transformation
+  -- algorithms.
+  LetRec :: Map Local (Exp v) -> Let v -> Let v
+
+  -- |
+  -- Just return a value; by construction the final continuation.
+  Return :: v -> Let v
+
   deriving stock (Eq, Show)
   deriving stock (Foldable, Functor, Traversable)
 
@@ -171,7 +183,9 @@ class HasFree a where
   free :: a -> Set Local
 
 instance HasFree v => HasFree (Let v) where
-  free (Let bs r) = (foldMap free bs <> free r) \\ M.keysSet bs
+  free (Let x e₁ e₂) = free e₁ <> (free e₂ \\ [x])
+  free (LetRec bs e) = (foldMap free bs <> free e) \\ M.keysSet bs
+  free (Return e) = free e
 
 instance HasFree v => HasFree (Exp v) where
   free (LambdaExp x e)  = free e \\ [x]

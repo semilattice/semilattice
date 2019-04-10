@@ -29,6 +29,7 @@ import Data.ByteString (ByteString)
   k_end_value             { ($$, KeywordT "end-value") }
   k_end_variant_type      { ($$, KeywordT "end-variant-type") }
   k_evaluate              { ($$, KeywordT "evaluate") }
+  k_evaluation            { ($$, KeywordT "evaluation") }
   k_external              { ($$, KeywordT "external") }
   k_for                   { ($$, KeywordT "for") }
   k_force                 { ($$, KeywordT "force") }
@@ -37,6 +38,7 @@ import Data.ByteString (ByteString)
   k_internal              { ($$, KeywordT "internal") }
   k_is                    { ($$, KeywordT "is") }
   k_linkage               { ($$, KeywordT "linkage") }
+  k_of                    { ($$, KeywordT "of") }
   k_over                  { ($$, KeywordT "over") }
   k_record                { ($$, KeywordT "record") }
   k_record_type           { ($$, KeywordT "record-type") }
@@ -150,9 +152,9 @@ TermExp3
 TermExp2
   : TermExp1
     { $1 }
-  | k_force TermExp1
+  | k_force k_evaluation k_of TermExp1
     { withLocationTermExp $1 $
-        ForceTermExp $2 }
+        ForceTermExp $4 }
 
 TermExp1
   : p_left_parenthesis TermExp p_right_parenthesis
@@ -164,9 +166,9 @@ TermExp1
     { withLocationTermExp $1 $
         let go (_, x) e = LambdaTermExp (Name x) e in
         foldr go $4 $2 }
-  | k_defer TermExp
+  | k_defer k_evaluation k_of TermExp
     { withLocationTermExp $1 $
-        DeferTermExp $2 }
+        DeferTermExp $4 }
   | k_record RecordExpBody k_end_record
     { withLocationTermExp $1 $
         RecordTermExp $2 }

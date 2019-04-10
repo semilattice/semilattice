@@ -23,6 +23,7 @@ signature is
 
 calculus division.
     over f x abstract
-        defer f (force x).
+        defer evaluation of
+            f (force evaluation of x).
 
 end-value.

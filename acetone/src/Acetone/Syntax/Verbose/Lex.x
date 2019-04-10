@@ -33,6 +33,7 @@ tokens :-
   "end-variant"           { \p _ -> (p, KeywordT "end-variant") }
   "end-variant-type"      { \p _ -> (p, KeywordT "end-variant-type") }
   "evaluate"              { \p _ -> (p, KeywordT "evaluate") }
+  "evaluation"            { \p _ -> (p, KeywordT "evaluation") }
   "external"              { \p _ -> (p, KeywordT "external") }
   "for"                   { \p _ -> (p, KeywordT "for") }
   "force"                 { \p _ -> (p, KeywordT "force") }
@@ -41,6 +42,7 @@ tokens :-
   "internal"              { \p _ -> (p, KeywordT "internal") }
   "is"                    { \p _ -> (p, KeywordT "is") }
   "linkage"               { \p _ -> (p, KeywordT "linkage") }
+  "of"                    { \p _ -> (p, KeywordT "of") }
   "over"                  { \p _ -> (p, KeywordT "over") }
   "record"                { \p _ -> (p, KeywordT "record") }
   "record-type"           { \p _ -> (p, KeywordT "record-type") }

@@ -1,0 +1,2 @@
+-- The contents of this source file are to be included after the generated Lua
+-- source code.

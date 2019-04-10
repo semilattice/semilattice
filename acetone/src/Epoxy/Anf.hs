@@ -112,6 +112,9 @@ data Red :: * -> * where
   -- Construct a variant from a discriminator and a value.
   InjectRed :: Discriminator -> v -> Red v
 
+  -- TODO: Move LazyRed to Intrinsic, add Ambient combinators to Intrinsic,
+  -- TODO: allow Intrinsic in Acetone AST.
+
   -- |
   -- Given a lambda that ignores its argument, memoize it. This can be used to
   -- implement lazy evaluation.

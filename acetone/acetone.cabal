@@ -30,6 +30,8 @@ library
         Acetone.Type.Constraint,
         Epoxy.Anf,
         Epoxy.Build,
+        Epoxy.Target.Lua.Compile,
+        Epoxy.Target.Lua.Link,
         Main.Acetonec
 
     ghc-options:

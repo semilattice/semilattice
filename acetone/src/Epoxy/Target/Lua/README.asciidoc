@@ -1,0 +1,19 @@
+= Lua target
+
+The Lua target generates Lua source code.
+
+== Runtime
+
+The runtime is included before and after the generated code. You can find the
+source code in the prologue.lua and epilogue.lua files.
+
+== Globals
+
+Globals are lazily initialized. This allows for cyclic dependencies between
+globals.
+
+== Runtime representation
+
+No Acetone value should have nil as its runtime representation in Lua. This is
+because assigning nil to a table field deletes the table field, breaking the
+guarantees of the hash table intrinsics.

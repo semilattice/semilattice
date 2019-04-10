@@ -17,7 +17,7 @@ import qualified Data.ByteString.Lazy as BSL
 
 tokens :-
 
-  [\ \n]                  ;
+  [\ \n\,\;]              ;
   "*>".*                  ;
 
   "abstract"              { \p _ -> (p, KeywordT "abstract") }

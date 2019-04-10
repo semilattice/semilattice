@@ -17,12 +17,12 @@ usage. "
 interface division.
 linkage is internal.
 signature is
-    for all a b such that
+    for all a, b such that
         (     a ->      b) ->
         (lazy a -> lazy b).
 
 calculus division.
-    over f x abstract
+    over f, x abstract
         defer evaluation of
             f (force evaluation of x).
 

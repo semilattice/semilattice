@@ -1,12 +1,20 @@
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GADTSyntax #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE KindSignatures #-}
 
 -- |
 -- EDSL for building ANF let programs.
 module Epoxy.Build
   ( -- * Infrastructure
     B
+  , Ξ
   , runB
+  , runΞ
+
+    -- * Programs
+  , let_
+  , letRec
 
     -- * Expressions
   , lambda
@@ -21,58 +29,66 @@ module Epoxy.Build
 
 import Epoxy.Anf
 
-import Control.Lens (Lens', (&), (?=), (<<.=), (<<+=), at, lens)
-import Control.Monad.Trans.State (State, runState)
+import Control.Lens (Lens', (&), (<<+=), lens)
+import Control.Monad.State.Class (MonadState)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Cont (ContT (..), runContT)
+import Control.Monad.Trans.State (State, evalState)
 import Data.Map (Map)
+import Data.Traversable (for)
 import Data.Word (Word64)
-
-import qualified Data.Map as Map
 
 --------------------------------------------------------------------------------
 -- Infrastructure
 
-newtype B a =
-  B { unB :: State Σ a }
-  deriving newtype (Applicative, Functor, Monad)
+type B = State Σ
+type Ξ = ContT (Let Val) B
 
-data Σ =
-  Σ
-    { σNext     :: Word64
-    , σBindings :: Map Local (Exp Val) }
+data Σ :: * where
+  Σ :: { σNext :: Word64 } -> Σ
 
-runB :: B Val -> Let Val
-runB (B b) =
-  let σ = Σ 0 Map.empty in
-  let (r, σ') = runState b σ in
-  LetRec (σBindings σ') (Return r)
+runB :: B (Let Val) -> Let Val
+runB b = evalState b σ₀
 
-bind :: Exp Val -> B Val
-bind e = B $ do
-  x <- _σNext <<+= 1 & fmap Local
-  _σBindings . at x ?= e
-  pure (LocalVal x)
+runΞ :: Ξ Val -> B (Let Val)
+runΞ ξ = runContT ξ (pure . Return)
 
-lift :: (Val -> B Val) -> B (Local, Let Val)
-lift λ = B $ do
-  x <- _σNext <<+= 1 & fmap Local
+σ₀ :: Σ
+σ₀ = Σ 0
 
-  oldBindings <- _σBindings <<.= Map.empty
-  r <- unB (λ (LocalVal x))
-  bs <- _σBindings <<.= oldBindings
+fresh :: MonadState Σ m => m Local
+fresh = _σNext <<+= 1 & fmap Local
 
-  pure (x, LetRec bs (Return r))
+--------------------------------------------------------------------------------
+-- Programs
+
+let_ :: Exp Val -> Ξ Val
+let_ e = ContT $ \ξ -> do
+  x <- fresh
+  Let x e <$> ξ (LocalVal x)
+
+letRec :: () -- TODO: Generate LetRec.
+letRec = undefined
 
 --------------------------------------------------------------------------------
 -- Expressions
 
-lambda :: (Val -> B Val) -> B Val
-lambda λ = do { (x, e) <- lift λ; bind (LambdaExp x e) }
+lambda :: (Val -> Ξ Val) -> Ξ Val
+lambda λ = do
+  x <- fresh
+  e <- lift $ runΞ (λ (LocalVal x))
+  let_ (LambdaExp x e)
 
-case_ :: Val -> Map Discriminator (Val -> B Val) -> B Val
-case_ e λs = do { λs' <- traverse lift λs; bind (CaseExp e λs') }
+case_ :: Val -> Map Discriminator (Val -> Ξ Val) -> Ξ Val
+case_ e ξs = do
+  ξs' <- for ξs $ \ξ -> do
+    x <- fresh
+    r <- lift $ runΞ (ξ (LocalVal x))
+    pure (x, r)
+  let_ (CaseExp e ξs')
 
-reduction :: Red Val -> B Val
-reduction r = bind (ReductionExp r)
+reduction :: Red Val -> Ξ Val
+reduction r = let_ (ReductionExp r)
 
 --------------------------------------------------------------------------------
 -- Values
@@ -91,6 +107,3 @@ constant = pure . ConstantVal
 
 _σNext :: Lens' Σ Word64
 _σNext = lens σNext (\s a -> s { σNext = a })
-
-_σBindings :: Lens' Σ (Map Local (Exp Val))
-_σBindings = lens σBindings (\s a -> s { σBindings = a })

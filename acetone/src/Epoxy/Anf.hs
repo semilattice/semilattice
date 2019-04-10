@@ -46,7 +46,7 @@ type Unit v =
 -- Programs
 
 -- |
--- Let bindings.
+-- Anything binds a variable before continuing.
 data Let :: * -> * where
 
   -- |
@@ -58,7 +58,7 @@ data Let :: * -> * where
   -- The bindings are unordered: the order in which they are evaluated is not
   -- important, because they are lazy. The bindings are unique: no two bindings
   -- bind the same variable, significantly simplifying transformation
-  -- algorithms.
+  -- algorithms.between
   LetRec :: Map Local (Exp v) -> Let v -> Let v
 
   -- |
@@ -78,8 +78,11 @@ data Exp :: * -> * where
   LambdaExp :: Local -> Let v -> Exp v
 
   -- |
-  -- Analyze a variant by giving an expression for each possible discriminator.
+  -- Analyze a variant by giving a continuation for each possible
+  -- discriminator.
   CaseExp :: v -> Map Discriminator (Local, Let v) -> Exp v
+  -- TODO: Move 'Case' to 'Let'? Might be tricky to generate, and is tricky
+  -- TODO: to evaluate without tail call optimization.
 
   -- |
   -- See 'Red'.
@@ -185,7 +188,7 @@ class HasFree a where
 instance HasFree v => HasFree (Let v) where
   free (Let x e₁ e₂) = free e₁ <> (free e₂ \\ [x])
   free (LetRec bs e) = (foldMap free bs <> free e) \\ M.keysSet bs
-  free (Return e) = free e
+  free (Return e)    = free e
 
 instance HasFree v => HasFree (Exp v) where
   free (LambdaExp x e)  = free e \\ [x]

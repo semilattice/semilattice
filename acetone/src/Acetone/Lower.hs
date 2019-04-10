@@ -15,7 +15,7 @@ module Acetone.Lower
 import Control.Lens ((&), (^?), (?~), at, ix)
 import Data.Map (Map)
 import Data.Traversable (for)
-import Epoxy.Build (B)
+import Epoxy.Build (Ξ)
 
 import qualified Acetone.Ast as A
 import qualified Data.Map as Map
@@ -41,14 +41,14 @@ lowerDef A.ValueSigDef{} =
 
 lowerDef (A.ValueDef (A.Name x) e) =
   Map.singleton (E.Global x)
-                (B.runB (lowerTermExp Map.empty e))
+                (B.runB (B.runΞ (lowerTermExp Map.empty e)))
 
 --------------------------------------------------------------------------------
 -- Term expressions
 
 type Γ = Map A.Name E.Val
 
-lowerTermExp :: Γ -> A.TermExp -> B E.Val
+lowerTermExp :: Γ -> A.TermExp -> Ξ E.Val
 
 lowerTermExp γ (A.LocationTermExp _ e) =
   lowerTermExp γ e

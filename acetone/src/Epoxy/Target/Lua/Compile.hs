@@ -29,8 +29,9 @@ import Epoxy.Anf
 
 import Control.Monad.Trans.Writer (Writer, runWriter)
 import Data.ByteString.Builder (Builder)
-import Data.Foldable (for_, traverse_)
+import Data.Foldable (for_)
 import Data.Tuple (swap)
+import Epoxy.Target.Lua.Object (Object (..))
 
 import qualified Control.Monad.Writer.Class as Writer
 import qualified Data.ByteString as BS
@@ -53,22 +54,19 @@ define x e = do
 --------------------------------------------------------------------------------
 -- Units
 
--- TODO: Instead of returning a Builder, return an object file which has all
--- the information necessary for linking safely.
-lowerUnit :: Unit Val -> G ()
-lowerUnit ds = do
-  traverse_ declareG (Map.toList ds)
-  traverse_ defineG (Map.toList ds)
+lowerUnit :: Unit Val -> [Object]
+lowerUnit ds = object <$> Map.toList ds
   where
-  declareG :: (Global, a) -> G ()
-  declareG (x, _) = Writer.tell $ "local " <> mangleGlobal x <> "\n"
-
-  defineG :: (Global, Let Val) -> G ()
-  defineG (x, e) = do
-    Writer.tell $ mangleGlobal x <> " = Rlazy(function(R_)\n"
-    r <- lowerLet e
-    Writer.tell $ "return " <> r <> "\n"
-    Writer.tell $ "end)\n"
+  object :: (Global, Let Val) -> Object
+  object (x, e) =
+    let
+      (code, ()) = runG $ do
+        Writer.tell $ mangleGlobal x <> " = Rlazy(function(R_)\n"
+        r <- lowerLet e
+        Writer.tell $ "return " <> r <> "\n"
+        Writer.tell $ "end)\n"
+    in
+      Object x code
 
 --------------------------------------------------------------------------------
 -- Programs

@@ -10,6 +10,7 @@ library
         base,
         bytestring,
         containers,
+        file-embed,
         lens,
         mtl,
         transformers
@@ -32,6 +33,7 @@ library
         Epoxy.Build,
         Epoxy.Target.Lua.Compile,
         Epoxy.Target.Lua.Link,
+        Epoxy.Target.Lua.Object,
         Main.Acetonec
 
     ghc-options:

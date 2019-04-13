@@ -13,7 +13,8 @@ import System.IO (stdout)
 
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy as BSL
-import qualified Epoxy.Target.Lua.Compile as Lua
+import qualified Epoxy.Target.Lua.Compile as Lua (lowerUnit)
+import qualified Epoxy.Target.Lua.Link as Lua (link)
 
 main :: IO ()
 main = do
@@ -21,4 +22,6 @@ main = do
   let unit = join sources
   case checkAll unit of
     Left err -> fail (show err)
-    Right () -> BSB.hPutBuilder stdout (fst (Lua.runG (Lua.lowerUnit (lowerUnit unit))))
+    Right () ->
+      let objects = Lua.lowerUnit (lowerUnit unit) in
+      BSB.hPutBuilder stdout (Lua.link objects)

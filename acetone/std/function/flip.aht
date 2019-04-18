@@ -7,12 +7,8 @@ since. "v0".
 usage. "
     To swap a binary function F means to create a new function that swaps its
     two inputs before passing them to F.
-
-    Properties
-    ==========
-
-    * The swap function is involutory.
 ".
+property. "is involutory".
 
 interface division.
 linkage is internal.

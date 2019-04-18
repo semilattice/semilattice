@@ -44,6 +44,7 @@ tokens :-
   "linkage"               { \p _ -> (p, KeywordT "linkage") }
   "of"                    { \p _ -> (p, KeywordT "of") }
   "over"                  { \p _ -> (p, KeywordT "over") }
+  "property"              { \p _ -> (p, KeywordT "property") }
   "record"                { \p _ -> (p, KeywordT "record") }
   "record-type"           { \p _ -> (p, KeywordT "record-type") }
   "remaining"             { \p _ -> (p, KeywordT "remaining") }

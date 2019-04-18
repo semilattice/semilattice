@@ -8,15 +8,11 @@ usage. "
     The absurd function is to be used when dealing with an empty variant, also
     known as the initial object in Act. It is also known by the phrase «ex
     falso quodlibet».
-
-    Properties
-    ==========
-
-    * The absurd function is idempotent.
-    * The absurd function is involutory.
-    * The absurd function has an empty domain.
-    * The absurd function has every input as a fixed point.
 ".
+property. "is idempotent".
+property. "is involutory".
+property. "has an empty domain".
+property. "has every input as a fixed point".
 
 interface division.
 linkage is internal.

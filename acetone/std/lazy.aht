@@ -4,15 +4,9 @@
 identification division.
 value-id. map-lazy.
 since. "v0".
-usage. "
-    Lift a function to work on lazy values.
-
-    Properties
-    ==========
-
-    * Mapping the identity function is the identity operation.
-    * Mapping is a function composition homomorphism.
-".
+usage. "Lift a function to work on lazy values.".
+property. "has the identity function as the identity element".
+property. "is a function composition homomorphism".
 
 interface division.
 linkage is internal.

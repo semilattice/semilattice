@@ -40,6 +40,7 @@ import Data.ByteString (ByteString)
   k_linkage               { ($$, KeywordT "linkage") }
   k_of                    { ($$, KeywordT "of") }
   k_over                  { ($$, KeywordT "over") }
+  k_property              { ($$, KeywordT "property") }
   k_record                { ($$, KeywordT "record") }
   k_record_type           { ($$, KeywordT "record-type") }
   k_remaining             { ($$, KeywordT "remaining") }
@@ -75,10 +76,9 @@ Def
   : k_identification k_division p_period
     k_value_id p_period
       identifier p_period
-    k_since p_period
-      string p_period
-    k_usage p_period
-      string p_period
+    IDSince
+    IDUsage
+    IDProperties
 
     k_interface k_division p_period
     k_linkage k_is Linkage p_period
@@ -90,8 +90,8 @@ Def
     k_end_value p_period
 
     { -- TODO: Preserve documentation information.
-      [ withLocationDef $1 $ ValueSigDef (Name (snd $6)) $21 $25
-      , withLocationDef $1 $ ValueDef (Name (snd $6)) $30 ] }
+      [ withLocationDef $1 $ ValueSigDef (Name (snd $6)) $16 $20
+      , withLocationDef $1 $ ValueDef (Name (snd $6)) $25 ] }
 
 TypeExp
   : TypeExp3 { $1 }
@@ -193,6 +193,11 @@ Identifiers0
 
 Identifiers1
   : identifier Identifiers0 { $1 : $2 }
+
+IDSince : k_since p_period string p_period { () } | { () }
+IDUsage : k_usage p_period string p_period { () } | { () }
+IDProperties : { () } | IDProperty IDProperties { () }
+IDProperty : k_property p_period string p_period { () }
 
 RowTypeBody
   : k_element identifier k_is TypeExp RowTypeBody

@@ -8,15 +8,11 @@ usage. "
     The identity function takes one input and returns it. The identity function
     is rarely used by itself; you will most often encounter it as an argument
     to a higher-order function.
-
-    Properties
-    ==========
-
-    * The identity function is idempotent.
-    * The identity function is involutory.
-    * The identity function is the identity element of function composition.
-    * The identity function is the identity morphism of any object in Act.
 ".
+property. "is idempotent".
+property. "is involutory".
+property. "is the identity element of function composition".
+property. "is the identity morphism of any object in Act".
 
 interface division.
 linkage is internal.
@@ -36,14 +32,10 @@ usage. "
     The composition of two functions F and G is a function that applies its
     input to G and the output of G to F and returns the output of F. Function
     composition is an important asset in the art of point-free programming.
-
-    Properties
-    ==========
-
-    * Function composition is associative.
-    * The identity element of function composition is the identity function.
-    * Function composition is the composition of any two morphisms in Act.
 ".
+property. "is associative".
+property. "has the identity function as the identity element".
+property. "is the composition of any two morphisms in Act".
 
 interface division.
 linkage is internal.
